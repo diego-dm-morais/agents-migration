@@ -14,6 +14,7 @@ python -I "$HERE/check_consistency.py" "$CLAUDE_DIR" || rc=1
 python -I "$HERE/check_rules.py" "$CLAUDE_DIR" || rc=1
 sh "$HERE/test-adr.sh" "$TMP" "$CHK" || rc=1
 sh "$HERE/test-deadline.sh" "$TMP" "$CHK" || rc=1
+sh "$HERE/test-symbols.sh" "$TMP" "$CHK" || rc=1
 sh "$HERE/test-check.sh" "$TMP" "$CHK" > "$TMP/check-states.txt" 2>&1
 sh "$HERE/test-rules.sh" "$TMP" "$CHK" > "$TMP/rules-states.txt" 2>&1
 echo "run-tests exit=$rc outputs=$TMP"

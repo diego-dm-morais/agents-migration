@@ -24,11 +24,11 @@ The dispatch prompt gives the unit id, the unit kind, the entry point if known, 
 3. Locate the entry point with Grep in the snapshot, under `source_root`. Open the lines with ranged Read.
 4. Trace the call chain in order: input validation, core logic, each branch, each error path, each side effect, including persistence (queries, schema, migrations). Cite every step as `path:line @sha7`.
 5. For each symbol you cannot resolve, add a Gaps entry with the reason.
-6. Record numeric and type semantics as cited facts: rounding, precision, overflow, encoding, time zone, ordering, null handling, defaults.
+6. Record numeric and type semantics as cited facts: rounding, precision, overflow, encoding, time zone, ordering, null handling, defaults. Measure on the pinned runtime (`migration-conduct` section 2).
 7. Write each business rule as `BR-<SLUG>-NNN` with the fields of the extraction template in `.claude/skills/migrate/references/templates.md`.
 8. Checkpoint: write `docs/migration/<unit>/extraction.md` after each batch of symbols, with `status: draft`.
 9. Close: tick each checklist item only when it is true. Set `status: ok` only when every item is ticked. Reopen every cited line once before you set `ok`.
-10. Run `sh .claude/skills/migrate/scripts/check.sh status <unit>` and `sh .claude/skills/migrate/scripts/check.sh cites docs/migration/<unit>/extraction.md`. Fix every INVALID.
+10. Run `sh .claude/skills/migrate/scripts/check.sh status <unit>` and `sh .claude/skills/migrate/scripts/check.sh cites docs/migration/<unit>/extraction.md`. Fix every INVALID. Then run `sh .claude/skills/migrate/scripts/check.sh symbols docs/migration/<unit>/extraction.md`: it is advisory, so reopen each listed symbol and fix the citation or the name. Run `sh .claude/skills/migrate/scripts/check.sh env` when the unit reads configuration or environment variables, and cite only the names you confirmed by opening the line; never copy values.
 
 ## Mode survey
 

@@ -7,7 +7,9 @@
 #   sh check.sh pin             snapshot HEAD must equal source_sha
 #   sh check.sh deadline        project deadline of MIGRATION.md: none, or the days left (OVERDUE when passed)
 #   sh check.sh cites <file>    each path:line @sha7 resolves in the snapshot
-#   sh check.sh ids [unit]      duplicate ids; BR->spec and FR->tasks coverage
+#   sh check.sh symbols <file>  each backticked identifier next to a citation appears in the cited file (advisory)
+#   sh check.sh env             env and config names the source reads, with path:line; never values (heuristic)
+#   sh check.sh ids [unit]     duplicate ids; BR->spec and FR->tasks coverage
 #   sh check.sh adr [unit]      ADR files: keys, sections, citations, unique ids; DEC->ADR coverage of the unit
 #   sh check.sh hash <file>     cksum of the body (no frontmatter), LF only
 #   sh check.sh scope <unit>    cksum of the files of the done tasks (review and doc stamp it)
@@ -487,8 +489,61 @@ do_cites() {
   if [ -z "$bad" ]; then echo "cites OK $n $1"; else echo "cites INVALID $n $1 $bad"; fi
 }
 
+# symbols_bad <file>: "symbol=<token>:<path>:not-in-cited-files" for each backticked identifier that sits on a
+# line with a path:line @sha7 citation and appears in none of the files cited on that line (fixed-string match).
+# Literals (true, false, null, none) and names under 3 characters are skipped. Last dotted segment is matched.
+symbols_bad() {
+  [ -f "$1" ] || return 0
+  sroot=$(fm "$MIG" source_root); sroot=${sroot:-.}
+  snap=$(fm "$MIG" source_snapshot)
+  tr -d '\r' < "$1" | while IFS= read -r ln; do
+    cites=$(printf '%s\n' "$ln" | grep -Eo '[A-Za-z0-9_./-]+:[0-9]+(-[0-9]+)? @[0-9a-f]{7}' | sed 's/:.*//' | sort -u)
+    [ -n "$cites" ] || continue
+    toks=$(printf '%s\n' "$ln" | grep -Eo '`[A-Za-z_][A-Za-z0-9_.]*(\(\))?`' | tr -d '`' | sed 's/()$//' | sort -u)
+    for t in $toks; do
+      name=${t##*.}
+      [ "${#name}" -ge 3 ] || continue
+      case "$name" in true|false|null|none|True|False|None|nil) continue ;; esac
+      found=0
+      for p in $cites; do
+        f="$snap/$sroot/$p"
+        if [ -f "$f" ] && grep -qF -- "$name" "$f"; then found=1; break; fi
+      done
+      [ "$found" -eq 1 ] || printf 'symbol=%s:%s:not-in-cited-files\n' "$t" "$(printf '%s\n' "$cites" | head -1)"
+    done
+  done | sort -u
+}
+
+do_symbols() {
+  [ -f "$1" ] || { echo "symbols MISSING $1"; return; }
+  bad=$(symbols_bad "$1" | tr '\n' ' ')
+  if [ -z "$bad" ]; then echo "symbols OK $1"; else echo "symbols INVALID $1 $bad"; fi
+}
+
+# do_env: names of environment variables and configuration keys read by the source, with path:line.
+# Heuristic (regex): confirm each name by opening the line before citing it. Values are never printed.
+do_env() {
+  sroot=$(fm "$MIG" source_root); sroot=${sroot:-.}
+  snap=$(fm "$MIG" source_snapshot)
+  root="$snap/$sroot"
+  [ -d "$root" ] || { echo "env MISSING $root"; return; }
+  q="[\"']?[A-Za-z_][A-Za-z0-9_-]*"
+  out=$(cd "$root" && {
+    grep -rnoEI --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor \
+      -e "(getenv|Getenv|GetEnvironmentVariable|System\.getenv|env::var|getProperty)\($q" \
+      -e "environ\.get\($q" -e "(environ|ENV)\[$q" -e 'process\.env\.[A-Za-z_][A-Za-z0-9_]*' . \
+    | sed -E 's/^\.\/(.*):([0-9]+):.*[(["'"'"'.]([A-Za-z_][A-Za-z0-9_-]*)$/env=\3 \1:\2/'
+    grep -rnI --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --include='.env*' --include='*.env' \
+      -E '^[[:space:]]*(export[[:space:]]+)?[A-Z][A-Z0-9_]*=' . \
+    | sed -E 's/^\.\/(.*):([0-9]+):[[:space:]]*(export[[:space:]]+)?([A-Z][A-Z0-9_]*)=.*/env=\4 \1:\2/'
+  } | sort -u)
+  n=$(printf '%s' "$out" | grep -c '^env=')
+  echo "env-inventory $n"
+  [ -z "$out" ] || printf '%s\n' "$out"
+}
+
 usage() {
-  echo "usage: sh check.sh status [unit] | pin | deadline | cites <file> | ids [unit] | adr [unit] | hash <file> | scope <unit>" >&2
+  echo "usage: sh check.sh status [unit] | pin | deadline | cites <file> | symbols <file> | env | ids [unit] | adr [unit] | hash <file> | scope <unit>" >&2
   exit 2
 }
 
@@ -510,6 +565,8 @@ case "$cmd" in
   pin) pin_line ;;
   deadline) deadline_line ;;
   cites) [ $# -eq 1 ] || usage; do_cites "$1" ;;
+  symbols) [ $# -eq 1 ] || usage; do_symbols "$1" ;;
+  env) do_env ;;
   ids)
     if [ $# -ge 1 ]; then
       valid_unit "$1" || { echo "unit INVALID $1"; exit 0; }

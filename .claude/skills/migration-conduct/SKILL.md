@@ -43,6 +43,7 @@ Claim parity only with evidence from the current run (section 3). Otherwise say 
 - The snapshot must match the pin. Run `check.sh pin`. If it does not match, every claim that depends on the source is `blocked` until it matches.
 - Do not write the behavior of a framework, library, runtime or language standard from memory. Look first in the dependency source at the pinned version, then in its official documentation. Cite the file and line or the URL, or record the fact as an open item.
 - A claim without a citation is a gap, not a fact.
+- Measure source behavior (a probe, a golden capture, a differential run) on the runtime and version the source pins: lockfile, container image, toolchain or version file. The runtime installed on the machine is not evidence. Record the runtime and version used next to the measurement. If the pinned runtime is not available, the measurement is `NOT RUN` and the claim stays an open item.
 - Names, paths and literals agree across spec, plan and extraction; a mismatch is a finding.
 
 ## 3. Evidence ladder
@@ -84,6 +85,16 @@ Before you ask anyone anything, read the code path that decides the point: the c
 - Never copy secret values (keys, tokens, passwords, client credentials) from the source, the fixtures or the docs into code, tests, logs or reports. Write `<redacted>` and cite where the value is.
 - Never write inside the source snapshot. Read it with Read, Grep and ranged reads. Run source code only from a copy outside the snapshot, or with flags that stop cache writes into it (for example `PYTHONDONTWRITEBYTECODE=1`). Send long command output to a file outside the repository and read its tail.
 
+## 6a. Git safety
+
+Applies to every agent that runs `git commit`, `git push` or opens a pull request, and to the orchestrator.
+
+- At intake, record the target repository: the output of `git remote get-url origin` and of `git rev-parse --show-toplevel`.
+- Before any commit, push or pull request, run both commands again and compare. A mismatch means stop and report; do not commit, push or open a pull request.
+- Commit, push and pull request only in the recorded repository. Never in another clone, another worktree or another project.
+- The build stage never runs on `main` or `master`. Check `git branch --show-current` first and stop if it is one of them.
+- History already written in another repository is not rewritten without an explicit user request.
+
 ## 7. Stable ids
 
 `BR-<SLUG>-NNN` rule · `FR-NNN` functional requirement · `TS-NNN` target requirement · `PEND-NNN` pending decision · `ID-NNN` planning decision · `T-NNN` task · `RV-NNN` review finding · `DEC-NNN` legacy decision candidate · `ADR-NNN` architecture decision record. Never renumber an id and never reuse one. Withdraw an id by marking it `withdrawn`; do not delete it.
@@ -123,8 +134,11 @@ Written: <paths>
 Checks: <command> -> <exit code and decisive line>, one line per check you ran
 Skills: <language skills loaded, or none (<language>)>
 Open: <id> <one fact>, at most 3 lines
+Deviation: <id or path:line> <reason; source>, one line per deviation or known-issue the run created or touched; omit the line when there is none
 NEEDS: none | <owner>: <state or fact, quoted>
 ```
+
+The `Deviation:` lines count in the 12-line limit, so keep each to one line.
 
 No preamble, no recap, no praise, no file contents. Cite `path:line` instead of quoting code. Keys stay in English; the prose follows the reply language (section 9).
 

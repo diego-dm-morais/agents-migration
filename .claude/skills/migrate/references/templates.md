@@ -84,6 +84,7 @@ status: draft
 ## Closure checklist
 - [ ] every entry point traced
 - [ ] every unresolved symbol resolved or listed under Gaps
+- [ ] `check.sh symbols` reviewed: every listed symbol fixed or explained
 - [ ] every response path mapped (success, each error, each exception)
 - [ ] every cited line reopened in this run
 - [ ] every rule has evidence

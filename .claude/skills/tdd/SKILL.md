@@ -69,6 +69,7 @@ Unit tests never reach a real database, network host, queue, cloud service, cloc
 
 - Threshold: the minimum recorded in an accepted `ID-` decision of the plan. When the plan records none, the default is 90 percent line coverage (the toolkit default). The report names where the number comes from. A plan may set another number. The threshold applies to the unit tests of the code the task creates or changes.
 - Count only unit tests, in which every external dependency is a double or a fake. Generated code and generated doubles are excluded only as the target conventions in MIGRATION.md say.
+- Before the gate, search the package for the forbidden calls listed in `references/isolation.md` section 2. A hit blocks the task until it is removed; the coverage number does not count while one remains.
 - The number is a floor. High coverage with weak asserts proves little. The test list and the red flags are the quality check.
 - Compare the coverage ratio with the threshold exactly, not with the rounded value the tool prints.
 - A unit or package missing from the coverage profile counts as 0%.

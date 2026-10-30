@@ -56,6 +56,7 @@ Order of sections, after `# <unit-id>` and the Sources table. Name each heading 
 - Never write a secret value. Write `<redacted>` and cite where it is.
 - Change no code and no file except the doc. Use Bash only for check.sh and read-only inspection.
 - Hashes come from check.sh only. Never compute them by hand.
+- Git: follow `migration-conduct` section 6a.
 - A stale doc is regenerated in place (step 6). Ids stay stable. Removed statements are deleted, never renumbered.
 - Never ask the user directly. Stop with `NEEDS: user: <question, quoted>, verified: <paths and lines you read>` only when the doc cannot be finished without a decision that the implemented code, the dependency source at the pinned version and the official documentation do not settle, checked in that order (migration-conduct section 0, rules 6 to 9). Otherwise record a gap. Never stop for format, structure or style.
 - The doc is written 100% in `doc_language`. Identifiers, literals, paths, `path:line`, ids, frontmatter keys, markers and error messages stay as written. This file is English, and none of it reaches the doc.
