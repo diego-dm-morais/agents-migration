@@ -346,7 +346,11 @@ check_artifact() {
   done
   case "$s" in
     extract)
-      bad="$bad$(dup_ids "$f")$(cites_tokens "$f")$(rules_without_evidence "$f")$(dec_issues "$f")" ;;
+      bad="$bad$(dup_ids "$f")$(cites_tokens "$f")$(rules_without_evidence "$f")$(dec_issues "$f")"
+      es=$(fm "$f" source_sha)
+      if [ -z "$es" ]; then bad="$bad source_sha-absent"
+      elif [ "$es" != "$(fm "$MIG" source_sha)" ]; then stale="$stale source_sha"
+      fi ;;
     spec)
       for id in $(ids_of "docs/migration/$u/extraction.md" 'BR-[A-Z0-9-]+-[0-9]{3}'); do
         has_id "$f" "$id" || bad="$bad uncovered-$id"
@@ -355,13 +359,13 @@ check_artifact() {
       pend=$(open_blocking_pend "$f" | tr '\n' ' ')
       if [ -n "$pend" ]; then state=BLOCKED; info="open-blocking: $pend"; fi ;;
     plan)
-      for id in $(ids_of "docs/migration/$u/spec.md" 'FR-[0-9]{3}'); do
+      for id in $(ids_of "docs/migration/$u/spec.md" '(FR|TS)-[0-9]{3}'); do
         has_id "$f" "$id" || bad="$bad plan-misses-$id"
       done
       bad="$bad$(dup_ids "$f")$(adr_issues "$u")" ;;
     tasks)
       bad="$bad$(dup_ids "$f")$(task_issues "$f")"
-      for id in $(ids_of "docs/migration/$u/spec.md" 'FR-[0-9]{3}'); do
+      for id in $(ids_of "docs/migration/$u/spec.md" '(FR|TS)-[0-9]{3}'); do
         has_id "$f" "$id" || bad="$bad uncovered-$id"
       done ;;
   esac
@@ -407,6 +411,10 @@ review_line() {
   st=$(fm "$f" status); rd=$(fm "$f" round); rh=$(fm "$f" scope_hash)
   case "$st" in draft|ok|blocked) ;; *) line "$u" review INVALID "status=${st:-absent}"; return ;; esac
   case "$rd" in ''|*[!0-9]*) line "$u" review INVALID "round=${rd:-absent}"; return ;; esac
+  lv=$(fm "$f" evidence_level); vf=$(fm "$f" verify)
+  case "$lv" in L0|L1|L2|L3) ;; *) line "$u" review INVALID "evidence_level=${lv:-absent}"; return ;; esac
+  case "$vf" in pass|fail|'NOT RUN') ;; *) line "$u" review INVALID "verify=${vf:-absent}"; return ;; esac
+  if [ "$st" = ok ] && [ "$vf" != pass ]; then line "$u" review INVALID "verify=$vf with status ok"; return; fi
   rv=$(tr -d '\r' < "$f" | awk '/^### RV-/ { rv = 1 } rv && /^status:/ { print $2 }')
   open=$(printf '%s\n' "$rv" | grep -c '^open$')
   blk=$(printf '%s\n' "$rv" | grep -c '^blocked$')

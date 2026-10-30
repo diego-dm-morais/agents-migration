@@ -36,8 +36,54 @@ deadline: none
 - Forbidden libraries or patterns:
 - Naming:
 
+## Non-functional requirements
+- NFR-001: <latency, throughput, observability, security or deployment requirement>; set by: <user, date>
+(Only requirements the user states. The source's own limits are facts in the extraction, not NFRs.)
+
 ## Backlog
-1. <unit-id> | <kind> | <entry point> | depends: none
+1. <unit-id> | <kind> | <entry point> | depends: none | service: <target service from ARCHITECTURE.md, or none>
+```
+
+## docs/migration/ARCHITECTURE.md
+
+Written by migration-planner in `architecture` mode, after the backlog and before the first unit plan. Optional when the target keeps the source structure (`target_architecture: same` in the frontmatter).
+
+```markdown
+---
+stage: architecture
+status: draft
+target_architecture: same | new
+upstream_migration: <check.sh hash of MIGRATION.md>
+---
+
+# Target architecture
+
+## Contexts and services
+- <service>: responsibility; units: <unit-id>, ...; owns data: <tables or stores>
+
+## Unit mapping
+| Unit | Target service | Shape (1:1, split, merge) | Source evidence |
+|---|---|---|---|
+
+## Shared domain
+- <type or rule shared across units>: owner service; `<path>:<line> @<sha7>`
+
+## Data ownership and migration
+- <store>: source schema `<path>:<line> @<sha7>`; target owner; strategy: shared DB | copy + backfill | dual-write | sync (ID-NNN)
+
+## Integrations and events
+- <external system or event>: contract `<path>:<line> @<sha7>`; target producer/consumer
+
+## Cutover
+- Shape: strangler facade | branch by abstraction | parallel run (ID-NNN)
+- Order: <unit or service order, following Backlog depends>
+- Rollback: <how traffic returns to the legacy>
+- Legacy decommission criterion: <observable check>
+
+## Decisions
+### ID-A001 <title>
+- status: proposed | accepted | withdrawn
+- reason:
 ```
 
 ## <unit>/extraction.md
@@ -47,6 +93,7 @@ deadline: none
 unit: <unit-id>
 stage: extract
 status: draft
+source_sha: <source_sha of MIGRATION.md at extraction time>
 ---
 
 # <unit-id>
@@ -160,8 +207,20 @@ upstream_spec: <check.sh hash of spec.md>
 ## Legacy decisions (ADR)
 - ADR-001: `docs/migration/adr/ADR-001-<slug>.md` (candidate DEC-001)
 
+## Data migration
+- none, or per store the unit writes: schema change, backfill, dual-write or sync, reconciliation check (from ARCHITECTURE.md)
+
+## Cutover
+- Route: <how traffic reaches the target for this unit: facade rule, feature flag>
+- Rollback: <how it returns to the legacy>
+
+## Parity harness
+- Golden capture: <command that records source output on the pinned runtime>
+- Differential (L3): <command that runs source and target on the same inputs and compares>, or `NOT AVAILABLE: <reason>`
+
 ## Validation
 - <step>: <validation command from the target gate>
+- coverage: <n>% line coverage, from ID-NNN, or `90% (toolkit default)`
 
 ## Trace
 - FR-001 -> <construct rows, TS- ids or ID- ids>
@@ -201,7 +260,11 @@ stage: review
 status: draft
 round: 1
 scope_hash: <check.sh scope <unit>>
+evidence_level: L0 | L1 | L2 | L3
+verify: pass | fail | NOT RUN
 ---
+
+`status: ok` requires `verify: pass` and `evidence_level` L2 or L3; a lower level needs an accepted deviation cited here, and the review states `parity not proven` otherwise.
 
 # <unit-id> review
 

@@ -12,7 +12,7 @@ Read this for `/migrate ask`, and when a stage stops with `user: <question>` or 
 
 Every open decision is one of three kinds. Classify it before you do anything else. Legacy first (conduct rule 10): if the legacy code answers the decision, it is a fact, however it was phrased.
 
-- **Fact.** What the code, the library or the runtime does. Answer it by reading or executing the source at the pin, and record the evidence (`path:line @sha7`, the captured output, or the URL). A fact is never a question to the user.
+- **Fact.** What the code, the library or the runtime does. Its owner (section 3) answers it by reading or executing the source at the pin, and records the evidence (`path:line @sha7`, the captured output, or the URL). A fact is never a question to the user.
 - **Conduct default.** A point that the migration conduct already decides: keep the source behavior (conduct rule 3), keep a source bug as `known-issue` (section 5 of the conduct), copy the observable error messages (section 1 of the conduct). Record it with the rule number, the evidence and the note "reversible: the user may change it". Never ask the user for it.
 - **User choice.** Anything the conduct does not decide: a different input type or format, a different error class or category, fixing a source bug, dropping a behavior, adding a dependency. Only these are asked.
 

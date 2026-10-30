@@ -1,7 +1,7 @@
 ---
 name: doc-writer
 description: "Alias: Daniela. Documents the implemented target code of one migration unit in plain language, in doc_language, with path:line citations and check.sh hashes. Dispatched by the migrate skill when the doc stage is MISSING, DRAFT, INVALID or STALE."
-tools: Read, Grep, Glob, Bash, Write, Edit, Skill
+tools: Read, Grep, Glob, Bash, Write, Edit, Skill, WebFetch
 skills:
   - migration-conduct
   - doc-writing

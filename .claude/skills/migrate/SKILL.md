@@ -2,7 +2,7 @@
 name: migrate
 description: "Orchestrates a code migration between two languages, one unit at a time. Sets up the project (init), reports the state of every unit (status), answers pending decisions (ask), and runs a unit through extraction, spec, plan, tasks, build, review and documentation. Runs only when the user types /migrate."
 disable-model-invocation: true
-argument-hint: "[help | init | status | ask [unit] | <unit> [extract|spec|plan|tasks|build|review|doc]]"
+argument-hint: "[help | init | status | architecture | ask [unit] | <unit> [extract|spec|plan|tasks|build|review|doc]]"
 allowed-tools: "Bash(sh ${CLAUDE_SKILL_DIR}/scripts/check.sh *), Bash(git clone --no-checkout *), Bash(git -C * checkout --detach *), Bash(git -C * rev-parse HEAD)"
 ---
 
@@ -20,6 +20,7 @@ You do not write migration code, specs, plans, reviews or docs yourself. You run
 - `help`: print `${CLAUDE_SKILL_DIR}/references/help.md` verbatim to the user and stop. Run no other step.
 - `init`: set up the project (`${CLAUDE_SKILL_DIR}/references/intake.md`).
 - `ask` or `ask <unit>`: answer pending decisions (`${CLAUDE_SKILL_DIR}/references/ask.md`).
+- `architecture`: dispatch migration-planner in mode `architecture` to write or refresh `docs/migration/ARCHITECTURE.md`. Run it after the backlog exists and before the first unit plan when the target is a new architecture. Its `ID-A` choices go through the ask flow like any `ID-`.
 - `<unit>`: run the unit through the stages until it is READY, or until a stop.
 - `<unit> <stage>`: run only that stage, after its upstream stages are OK.
 
@@ -41,6 +42,7 @@ Run it before every decision and after every worker returns. Its output is the o
 2. Choose the stage:
    - for `<unit>`: the first stage in order (extract, spec, plan, tasks) that is not OK. When every stage through tasks is OK, the unit is READY; continue to build only if the user asked for it.
    - for `<unit> <stage>`: that stage. Every upstream stage must be OK first; if one is not, report it and stop.
+2a. Dependencies: before the build of a unit, every unit in its Backlog `depends:` must have review OK. If one does not, report it and stop. Before the plan of a unit, when ARCHITECTURE.md has `target_architecture: new`, its state must be OK (frontmatter `status: ok`, `upstream_migration` equal to `check.sh hash` of MIGRATION.md); otherwise run `architecture` first.
 3. Freeze check: if any task in `tasks.md` has a status other than `pending`, the build has started. Do not dispatch spec-writer, migration-planner or task-decomposer. Report and stop.
 4. Look up the owner of the state in `routing.md`. Dispatch it with the Agent tool, `subagent_type` set to the owner's name. The prompt gives: the unit id, the stage, the artifact path, the path of `docs/migration/MIGRATION.md`, the state line that caused the dispatch, and this line: "Your final message follows the migration-conduct contract."
 5. Dispatch one worker and wait for its result before any other step. The result arrives as a notification. Do not check the artifacts or dispatch again before it.
@@ -50,7 +52,7 @@ Run it before every decision and after every worker returns. Its output is the o
    - `user: <question>`: stop the unit and run the ask flow.
    - anything else: stop and report.
 7. Stop, and report, when the state is BLOCKED with no owner, INVALID after the limit, or STALE after the limit.
-8. Documentation sync: once the unit reaches build, review or doc, check the doc state. A doc STALE means the code or a source artifact changed after the doc was written. Dispatch doc-writer (within `limit_dispatch`) once the review is OK, before you report the unit done. The doc follows the code, never the other way around.
+8. Documentation sync: once the user-requested build has run and the unit is in build, review or doc, check the doc state. A doc STALE means the code or a source artifact changed after the doc was written. Dispatch doc-writer (within `limit_dispatch`) once the review is OK, before you report the unit done. The doc follows the code, never the other way around.
 
 ## Review loop (`<unit> review`, or the review step of READY)
 

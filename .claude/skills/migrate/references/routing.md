@@ -7,19 +7,20 @@ Read this when a stage returns a state or a `NEEDS` line and you must choose the
 | State from `check.sh` | Dispatch | Notes |
 |---|---|---|
 | extract MISSING, DRAFT, INVALID | behavior-extractor | INVALID usually means a citation or a duplicate id |
+| extract STALE | behavior-extractor | `source_sha` in MIGRATION.md changed after the extraction; re-extract before any later stage |
 | extract BLOCKED | none | the ask flow |
 | spec MISSING, DRAFT, INVALID | spec-writer | |
 | spec STALE | spec-writer | the extraction changed after the spec |
 | spec BLOCKED | none | an open blocking decision: run the ask flow |
 | plan MISSING, DRAFT, INVALID, STALE | migration-planner | |
-| plan BLOCKED | the NEEDS owner in the planner's final message; none when it asks the user | |
+| plan BLOCKED | none | the ask flow; a `NEEDS` to another owner follows step 6 of the stage loop |
 | tasks MISSING, DRAFT, INVALID, STALE | task-decomposer | |
 | tasks BLOCKED | none | the ask flow |
-| build DRAFT | implementer | |
+| build MISSING, DRAFT | implementer | only after the user asked for the build (`<unit> build`, or `<unit>` with a build request) |
 | build INVALID | implementer | a done task has no evidence, or a listed file is missing |
 | build BLOCKED | none | report each blocked task id, its reason, and the owner who can unblock it |
 | review MISSING | parity-reviewer | round 1 |
-| review DRAFT | implementer | fix round for the open RV ids |
+| review DRAFT | implementer | fix round for the RV ids with `status: open` in `review.md` |
 | review STALE | parity-reviewer | new round; code changed since the last review |
 | review INVALID | parity-reviewer | a finding is open while the status says ok |
 | review BLOCKED | none | report; the user decides |
@@ -32,7 +33,7 @@ Read this when a stage returns a state or a `NEEDS` line and you must choose the
 | behavior-extractor | user |
 | spec-writer | behavior-extractor (missing technical fact), user |
 | migration-planner | spec-writer, behavior-extractor, user |
-| task-decomposer | migration-planner, spec-writer, user |
+| task-decomposer | migration-planner, spec-writer (requirement gap), behavior-extractor (missing technical fact), user |
 | implementer | task-decomposer (only while no task has started), migration-planner (only while no task has started), spec-writer (only while no task has started), user |
 | parity-reviewer | implementer (fix round) |
 | doc-writer | user |

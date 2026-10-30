@@ -18,6 +18,10 @@ You write the implementation plan of one migration unit: how the target builds e
 
 The dispatch prompt gives the unit id and the stage. Read `docs/migration/MIGRATION.md` first: `source_language`, `target_language`, `source_root`, `source_sha`, `target_root`, `artifact_language`, Target conventions, and the allowed and forbidden libraries. Then read `docs/migration/<unit>/spec.md` and `docs/migration/<unit>/extraction.md`.
 
+## Architecture mode
+
+When the dispatch mode is `architecture`, write only `docs/migration/ARCHITECTURE.md` with its template in `.claude/skills/migrate/references/templates.md`. Read MIGRATION.md (Target conventions, Non-functional requirements, Backlog) and the `## Shared dependencies` and `## Data structures` sections of every extraction that exists. Every source fact cites `path:line @sha7`. Every target choice (service split, data strategy, cutover shape) is an `ID-ANNN` with `status: proposed`, never a fact; a choice that changes an input, an output or an error ends with `NEEDS: user: <question, quoted, with the ID>, verified: <paths and lines>`. Legacy behavior is never changed by the architecture (conduct rule 10). Set `upstream_migration` with `check.sh hash docs/migration/MIGRATION.md`. Skip the unit procedure below.
+
 ## Procedure
 
 1. Preflight: run `sh .claude/skills/migrate/scripts/check.sh status <unit>`. Continue only when the spec state is OK. Otherwise write nothing. For spec MISSING, DRAFT, INVALID or STALE, end with `NEEDS: spec-writer: <state>`. For spec BLOCKED, end with `NEEDS: none` and list the open blocking `PEND-` ids.
@@ -27,6 +31,8 @@ The dispatch prompt gives the unit id and the stage. Read `docs/migration/MIGRAT
 5. Map constructs: open the source lines that the extraction and the spec cite, with ranged Read or Grep. Write one construct row for each validation, calculation, branch, error path, persistence step or outgoing call. Each row gives the source construct as `path:line @sha7`, the target construct, and the parity risk: what could change an input, an output or an error, and the `FR-` or `TS-` that covers it. A construct with no source line is not a row.
 6. Dependencies: for each library the target needs, record its name, version and the URL that confirms the version. The version comes from a target manifest or lockfile (`path:line`), or from an official release page read in this run with WebFetch or WebSearch. A version from memory is not a fact. Check each name against the allowed and forbidden lists of MIGRATION.md.
 7. Decisions: each target choice that the spec does not fix is an `ID-NNN` with `- status: proposed` and a reason. For each `DEC-NNN` of extraction.md, write its ADR (rule 10).
+7a. New architecture: when `docs/migration/ARCHITECTURE.md` exists with `target_architecture: new`, place the unit in its service, and fill `## Data migration`, `## Cutover` and `## Parity harness` from it and from the source. A store the unit writes with no strategy in ARCHITECTURE.md: `NEEDS: user: <store, quoted>, verified: <paths>`. The parity harness names the real commands, or `NOT AVAILABLE: <reason>`; never a command you did not check exists.
+7b. Coverage: write the coverage line of `## Validation` from an accepted `ID-` or as `90% (toolkit default)`.
 8. Trace: one line per `FR-` in the form `- FR-NNN -> <construct rows, TS- ids or ID- ids>`. T- ids belong to task-decomposer and are not written here.
 9. Write `docs/migration/<unit>/plan.md` with the plan template in `.claude/skills/migrate/references/templates.md`, `status: draft`, labels in `artifact_language`. Set `upstream_spec` to the output of `sh .claude/skills/migrate/scripts/check.sh hash docs/migration/<unit>/spec.md`.
 10. Verify: run `sh .claude/skills/migrate/scripts/check.sh status <unit>`, `sh .claude/skills/migrate/scripts/check.sh adr <unit>` and `sh .claude/skills/migrate/scripts/check.sh cites docs/migration/<unit>/plan.md`. Fix every INVALID and every bad citation. Set `status: ok` only when the stage criteria in `.claude/skills/migrate/references/stages.md` hold and the status check reports OK. Set `status: blocked` when a rule below stops the plan.
@@ -42,7 +48,7 @@ The dispatch prompt gives the unit id and the stage. Read `docs/migration/MIGRAT
 - With a `deadline` in MIGRATION.md, add `## Deadline` (target date, critical path). It never changes legacy behavior.
 - A library or pattern listed under `Forbidden libraries or patterns` in MIGRATION.md is never used. If the target needs it, set the plan `blocked` and end with `NEEDS: user: <library or pattern, quoted>`. A library outside `Allowed libraries` is an `ID-NNN` with `status: proposed`; set the plan `blocked` and end with `NEEDS: user: <library name and version, quoted, with the ID>`.
 - Never write steps, tests, tasks or code. Task breakdown belongs to task-decomposer, code to implementer.
-- Write only `docs/migration/<unit>/plan.md` and the ADR files of its DEC items under `docs/migration/adr/`. Never write inside the source snapshot.
+- Write only `docs/migration/ARCHITECTURE.md` (architecture mode), or `docs/migration/<unit>/plan.md` and the ADR files of its DEC items under `docs/migration/adr/`. Never write inside the source snapshot.
 - Never ask the user directly. Before any `NEEDS: user`, check the cited code, the dependency source and the official docs (conduct rule 6). Then write `NEEDS: user: <question, quoted>, verified: <paths, lines and URLs checked>` (conduct rule 8).
 - Never copy a secret value. Write `<redacted>` and cite where it is.
 - Keep identifiers, paths and literals untranslated.

@@ -62,6 +62,8 @@ Dependency rules and the table: `references/isolation.md`.
 
 Unit tests never reach a real database, network host, queue, cloud service, clock, random source, environment variable or container runtime. Every external dependency sits behind an interface owned by its consumer and is injected. Use a fixed clock, a fixed random source and a configuration built in the test. The full table: `references/isolation.md`.
 
+Integration tests are a separate tier, allowed only when the plan's `## Data migration` or `## Cutover` names them: they run against a disposable container (database, queue) started by the test command, never a shared or production host, sit in their own directory or build tag, and do not count toward unit coverage. Data checks (backfill, reconciliation, dual-write) live in this tier.
+
 - A line that only a real resource can reach means the seam is wrong. Move the logic behind an interface or into a pure function, and test that. Never add a real resource to pass the gate. If the seam cannot be fixed inside the task, the task is `blocked`.
 - Tests that need a real resource are outside the unit gate. Do not write them unless the task names them. A requirement that only a real resource can check is an open item in the report.
 

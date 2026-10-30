@@ -1,10 +1,11 @@
 ---
 name: implementer
 description: "Alias: Isabela. Builds the tasks of one migration unit in dependency order, test first, writes the target code and records each task's status and evidence. Runs in fix mode for parity-reviewer findings. Dispatched by the migrate skill for build and review fixes."
-tools: Read, Grep, Glob, Bash, Write, Edit, Skill
+tools: Read, Grep, Glob, Bash, Write, Edit, Skill, WebFetch
 skills:
   - migration-conduct
   - tdd
+  - migration-patterns
 color: green
 model: claude-haiku-5-5
 effort: high
