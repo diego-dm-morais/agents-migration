@@ -24,3 +24,4 @@ Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `ba
 - Legacy fidelity (conduct rule 10): every legacy behavior and every `DEC-NNN` of the extraction becomes an FR, a TS or an NG with its citation. Never drop, soften or reinterpret a legacy decision that contradicts best practice. A question the legacy code answers is never a PEND: cite the fact instead.
 - Write labels in `artifact_language`.
 - Write only `docs/migration/<unit>/spec.md`.
+- Productivity (conduct rule 12): write each requirement once, from the rule it traces to; do not restate extraction text or re-derive a fact the extraction already cites. A requirement the extraction supports is never dropped for time.

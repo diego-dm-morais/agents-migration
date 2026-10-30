@@ -54,6 +54,7 @@ source_sha: $ZERO
 - \`src/app.py:2 @0000000\` run
 
 ### BR-DEMO-001 Adds one
+- Class: none
 - Statement: run returns x plus one.
 - Evidence: \`src/app.py:3 @0000000\` $1
 
@@ -186,6 +187,45 @@ OUT=$(printf '%s' "$LONG" | sh "$CHK" contract 2>&1)
 expect "9 more than 12 lines blocks" "more-than-12-lines" "$OUT"
 expect_empty "9 other agent types are not checked" "$(printf '%s' "$OTHER" | sh "$CHK" contract 2>&1)"
 expect_empty "9 a stop after a block is allowed" "$(printf '%s' "$LOOP" | sh "$CHK" contract 2>&1)"
+
+# 10. probes: a rule declared numeric needs a Probe line with its output; a rule with Class none does not
+cat > "$EX" <<EOF
+---
+unit: demo
+stage: extract
+status: ok
+source_sha: $ZERO
+---
+# demo
+
+## Entry points
+- \`src/app.py:2 @0000000\` run
+
+### BR-DEMO-001 Adds one
+- Class: none
+- Class: numeric
+- Statement: run returns x plus one.
+- Evidence: \`src/app.py:3 @0000000\` "return x + 1"
+
+## Legacy decisions contrary to best practice
+- none found: searched src/app.py
+
+## Gaps
+- none
+EOF
+OUT=$(cd "$P" && sh "$CHK" probes demo 2>&1)
+expect "10 numeric rule without a Probe line is INVALID" "demo probes INVALID no-probe-BR-DEMO-001" "$OUT"
+expect "10 status extract flags the missing Probe" "no-probe-BR-DEMO-001" "$(st)"
+sed -i 's/^- Class: numeric$/- Class: numeric\n- Probe: x=1; print(x+1) on CPython 3.12 -> 2/' "$EX"
+OUT=$(cd "$P" && sh "$CHK" probes demo 2>&1)
+expect "10 numeric rule with a Probe line and its output is OK" "demo probes OK" "$OUT"
+expect "10 status extract OK with the Probe" "demo extract OK" "$(st)"
+sed -i 's/^- Class: numeric$/- Class: none/' "$EX"
+OUT=$(cd "$P" && sh "$CHK" probes demo 2>&1)
+expect "10 rule with Class none needs no Probe" "demo probes OK" "$OUT"
+sed -i '/^- Class:/d' "$EX"
+OUT=$(cd "$P" && sh "$CHK" probes demo 2>&1)
+expect "10 rule without any Class line is INVALID" "demo probes INVALID no-class-BR-DEMO-001" "$OUT"
 
 echo "----"
 echo "pass=$PASS fail=$FAIL"

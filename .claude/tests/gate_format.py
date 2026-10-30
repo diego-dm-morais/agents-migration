@@ -22,8 +22,10 @@ fails = 0
 AGENT_MAX_LINES = 100
 AGENT_MAX_BYTES = 7 * 1024
 TOTAL_AGENT_BYTES = 43 * 1024
-# The one model the seven agents pin (decision of 2026-10-30, docs/convencoes.md). Any other value fails.
+# The one model and the one effort that the seven agents and the migrate skill pin (decision of 2026-10-30,
+# docs/convencoes.md). Any other value fails.
 PINNED_MODEL = "claude-haiku-5-5"
+PINNED_EFFORT = "medium"
 total_agent_bytes = 0
 
 
@@ -82,6 +84,13 @@ for sk in sorted(glob.glob(os.path.join(root, "skills", "*", "SKILL.md"))):
     unknown = set(data) - SKILL_KEYS
     if unknown:
         fail(sk, f"unknown frontmatter keys: {sorted(unknown)}")
+    if "effort" in data and data["effort"] not in EFFORTS:
+        fail(sk, f"effort '{data['effort']}' is not allowed")
+    if dirname == "migrate":
+        if data.get("model") != PINNED_MODEL:
+            fail(sk, f"model '{data.get('model')}' is not '{PINNED_MODEL}' (pinned by decision of 2026-10-30)")
+        if data.get("effort") != PINNED_EFFORT:
+            fail(sk, f"effort '{data.get('effort')}' is not '{PINNED_EFFORT}' (pinned by decision of 2026-10-30)")
     meta = data.get("metadata")
     if isinstance(meta, dict):
         for k, v in meta.items():
@@ -119,10 +128,10 @@ for ag in sorted(glob.glob(os.path.join(root, "agents", "*.md"))):
         fail(ag, f"unknown frontmatter keys: {sorted(unknown)}")
     if "color" in data and data["color"] not in COLORS:
         fail(ag, f"color '{data['color']}' is not allowed")
-    if "effort" in data and data["effort"] not in EFFORTS:
-        fail(ag, f"effort '{data['effort']}' is not allowed")
-    if "model" in data and data["model"] != PINNED_MODEL:
-        fail(ag, f"model '{data['model']}' is not allowed (only '{PINNED_MODEL}' is pinned, by decision of 2026-10-30)")
+    if data.get("model") != PINNED_MODEL:
+        fail(ag, f"model '{data.get('model')}' is not '{PINNED_MODEL}' (pinned by decision of 2026-10-30)")
+    if data.get("effort") != PINNED_EFFORT:
+        fail(ag, f"effort '{data.get('effort')}' is not '{PINNED_EFFORT}' (pinned by decision of 2026-10-30)")
     for ref in data.get("skills", []) or []:
         if ref not in skill_names:
             fail(ag, f"skills: '{ref}' has no skill directory")

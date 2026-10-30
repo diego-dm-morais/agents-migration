@@ -32,6 +32,12 @@ At the first reply of each session in this project, before any other work:
 - Language skills: golang, java, python, nodejs, typescript, javascript, dotnet, rust, flutter. Load the skill for the source language or the target language.
 - Human docs (pt-BR, not loaded by agents): `.claude/docs/README.md`.
 
+## Run configuration
+
+- Every agent runs on model `claude-haiku-5-5` at effort `medium`: a balance of accuracy, productivity and speed, aimed at meeting the `deadline`. Each agent sets both in its frontmatter, the `/migrate` skill sets them for the orchestrator, and `.claude/tests/gate_format.py` fails on any other value.
+- Changing the model or the effort is a user decision. Record it in `.claude/docs/convencoes.md` and update `PINNED_MODEL` or `PINNED_EFFORT` in the gate.
+- The mandatory rules below guide every stage: analysis, planning, implementation, tests, validation and documentation.
+
 ## Mandatory rules (full text: migration-conduct skill, section 0)
 
 1. **No hallucination.** Every statement about source behavior cites `path:line @sha7`, opened in this run. A library or runtime fact cites its official URL or the dependency source at the pinned version. No citation, no fact.
@@ -39,13 +45,15 @@ At the first reply of each session in this project, before any other work:
 3. **Faithful documentation.** Document behavior as the code implements it, bugs included (`known-issue`). Do not change or reinterpret behavior to follow best practice. An idiomatic choice is allowed only when inputs, outputs and errors stay the same.
 4. **The primary source is the implemented code.** The spec and any existing docs are labeled context, never the source of behavior.
 5. **Docs stay in sync with the implementation.** A unit doc records the hashes of its sources and of the code scope. When code or a source artifact changes, the doc is STALE and must be regenerated before the unit is done.
-6. **Investigate before asking.** In this order: (a) the implemented code, source and target; (b) the dependency source at the pinned version (lockfile, vendored code, local package cache); (c) the official documentation of the language, framework or library. Only then ask, and only when the answer changes what gets built.
-7. **No irrelevant questions.** Never ask what the code or the library answers, or what a default would settle without changing the result. Record the default with `blocking: no`.
+6. **Investigate before asking.** In this order: (a) the implemented code, source and target, with its tests and configuration; (b) the dependency source at the pinned version (lockfile, vendored code, local package cache); (c) the official documentation of the language, framework or library. The legacy repository's documentation is context only. Only then ask, and only when the answer changes what gets built.
+7. **No irrelevant questions.** Never ask what the code or the library answers, or what a default would settle without changing the result. Record the default with `blocking: no`. Never hand the user an investigation that you can run yourself.
 8. **Every question states what was checked** (paths, lines, URLs) and why the answer is not there.
 9. **An unanswered blocking question** stops the unit with `NEEDS: user: <question, quoted>`. Never pick the behavior yourself.
-10. **Legacy fidelity.** Never ask the user a question that the legacy code can answer. Before any clarification, investigate the legacy code and identify its behavior, business rules and implemented decisions. The legacy code is the source of truth: preserve its behavior, business rules and decisions, even when they do not follow best practices or the recommended patterns of the target language. Do not change legacy behavior to fit best practices on your own initiative; functional fidelity to the original system comes first. Record in an ADR (Architecture Decision Record) every legacy decision that contradicts best practices and must be preserved: the decision, the reason to keep the original behavior, the best practices it contradicts, and the justification for keeping that implementation in the migration. Every agent applies this rule consistently in analysis, planning, implementation, testing and validation (`migration-conduct` section 0 and section 13).
+10. **Legacy fidelity (absolute priority).** The goal is to preserve the behavior of the legacy system and reproduce it in the new project. Functional equivalence comes first, before best practices, style or speed. Never ask the user a question that the legacy code can answer. The legacy code is the source of truth: preserve its behavior, business rules, validations and decisions, even when they do not follow best practices or the recommended patterns of the target language. Do not change legacy behavior to fit best practices on your own initiative. Record in an ADR (Architecture Decision Record) every legacy decision that contradicts best practices and must be preserved. Every agent applies this rule in analysis, planning, implementation, testing, validation and documentation (`migration-conduct` section 0 and section 13).
 
 11. **No creativity in the target.** Agents invent no behavior, rule, field, state, route, event, string or layout. Every UI state, event and text comes from the legacy code at the pin, with `path:line @sha7`. A gap becomes `Gaps` or a `blocking: yes` PEND, never an assumption.
+
+12. **Productivity within the deadline.** Be critical of your own decisions and deliverables. Do not repeat an analysis, ask an unnecessary question or build what no requirement needs. Choose the objective and safe solution that keeps the legacy behavior, and order the work for progress toward the `deadline`. Never trade functional fidelity or technical quality for speed.
 
 Also: source bugs stay as `known-issue`; a conflict between a standard and the behavior is recorded as `deviation` with its reason. Report the real output of every command; a gate that did not run is not a pass.
 

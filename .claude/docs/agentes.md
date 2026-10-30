@@ -57,11 +57,13 @@ Estas regras valem para todos os agentes. A lista completa está em `skills/migr
 | 3 | Documentação fiel. O comportamento segue o código, com bugs (`known-issue`). Nada muda para seguir boa prática. |
 | 4 | A fonte primária é o código implementado. Spec e docs antigos são só contexto. |
 | 5 | Docs sincronizados. A doc guarda hashes; se o código ou um artefato-fonte mudar, a doc fica STALE. |
-| 6 | Investigar antes de perguntar: código, depois dependência na versão fixada, depois documentação oficial. |
-| 7 | Sem pergunta irrelevante. O padrão é registrado com `blocking: no`. |
+| 6 | Investigar antes de perguntar: código (com testes e configuração), depois dependência na versão fixada, depois documentação oficial. A documentação do legado é só contexto. |
+| 7 | Sem pergunta irrelevante. O padrão é registrado com `blocking: no`. Nunca se devolve ao usuário uma investigação que o agente pode fazer. |
 | 8 | Toda pergunta diz o que foi verificado, com caminhos, linhas ou URLs. |
 | 9 | Pergunta bloqueante sem resposta para a unidade, com `NEEDS: user: <pergunta, entre aspas>`. O agente nunca escolhe o comportamento sozinho. |
-| 10 | Fidelidade ao legado. O código legado responde antes de qualquer pergunta. Decisão legada que contraria boa prática é preservada e registrada em ADR (seção 13). |
+| 10 | Fidelidade ao legado, com prioridade absoluta. A equivalência funcional vem antes de boa prática, estilo ou velocidade. O código legado responde antes de qualquer pergunta. Decisão legada que contraria boa prática é preservada e registrada em ADR (seção 13). |
+| 11 | Sem criatividade no alvo. Nada é inventado que o legado não implemente. Lacuna vira `Gaps` ou PEND bloqueante, nunca suposição. |
+| 12 | Produtividade dentro do prazo. Cada entrega é conferida contra as fontes; não se repete análise nem se constrói o que nenhum requisito pede. Prazo e velocidade não reduzem fidelidade nem qualidade técnica. |
 
 ## behavior-extractor (Eduardo)
 

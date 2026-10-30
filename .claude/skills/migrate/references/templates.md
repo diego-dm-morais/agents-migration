@@ -106,11 +106,13 @@ source_sha: <source_sha of MIGRATION.md at extraction time>
 1. <step> — `<path>:<line> @<sha7>`
 
 ### BR-<SLUG>-001 <short title>
+- Class: none | numeric | serialization | encoding
 - Statement:
 - Trigger or condition:
 - Effect:
 - Error or status:
 - Evidence: `<path>:<line> @<sha7>` "<exact snippet of one source line inside that range>"
+- Probe: <command run on the pinned runtime, with its version> -> <decisive output>. Required when Class is numeric, serialization or encoding.
 
 ## Numeric and type semantics
 - <fact> — `<path>:<line> @<sha7>`

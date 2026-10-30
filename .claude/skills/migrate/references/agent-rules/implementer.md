@@ -32,3 +32,4 @@ Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `ba
 - A `deadline` sets the order of the work. It never skips a test, a gate or a characterization test.
 - Use only your listed tools and skills. Finished code has no TODO and no dead code: delete code that no behavior needs.
 - Read the spec and extraction sections a task cites before changing its files. A failed final gate resets the owning task to `in_progress`.
+- Productivity (conduct rule 12): write the smallest code that makes the failing test pass, and nothing the spec or the tests do not need. Run the narrowest check that proves each step, and leave the whole gate to the `verify` task. Review your diff against the cited `FR-` and `TS-` before `done`. Never skip a test or a gate for time.

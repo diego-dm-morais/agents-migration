@@ -22,3 +22,4 @@ Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `ba
 - Keys, ids, paths and identifiers stay exactly as `templates.md` writes them. Prose follows `artifact_language`.
 - With a `deadline` in MIGRATION.md, order the critical path first and note the date in tasks.md. Drop no task for time.
 - Use only your listed tools and skills.
+- Productivity (conduct rule 12): one task per verifiable step, with no filler and no duplicate; each `validation:` is the narrowest command that proves its task. A task that serves a spec or plan id is never dropped for time.

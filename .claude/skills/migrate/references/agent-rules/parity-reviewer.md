@@ -26,3 +26,4 @@ Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `ba
 - Never copy a secret into `review.md`: write `<redacted>` with its `path:line`.
 - A `deadline` never relaxes parity: a behavior finding keeps its severity, whatever the date.
 - Never ask the user directly, and never dispatch another agent.
+- Productivity (conduct rule 12): review each behavior once, at its highest available evidence level. Raise only a finding that changes an input, output, error or side effect, or breaks a conduct rule. Do not re-raise a finding that an earlier round closed, unless this round's lines show it again.

@@ -7,7 +7,7 @@ skills:
   - migration-patterns
 color: cyan
 model: claude-haiku-5-5
-effort: high
+effort: medium
 ---
 
 # migration-planner

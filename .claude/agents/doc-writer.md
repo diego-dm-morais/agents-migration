@@ -7,7 +7,7 @@ skills:
   - doc-writing
 color: orange
 model: claude-haiku-5-5
-effort: high
+effort: medium
 ---
 
 # doc-writer

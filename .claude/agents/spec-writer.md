@@ -7,7 +7,7 @@ skills:
   - migration-patterns
 color: purple
 model: claude-haiku-5-5
-effort: high
+effort: medium
 ---
 
 # spec-writer

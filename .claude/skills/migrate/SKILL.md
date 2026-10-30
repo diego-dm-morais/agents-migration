@@ -2,6 +2,8 @@
 name: migrate
 description: "Orchestrates a code migration between two languages, one unit at a time. Sets up the project (init), reports the state of every unit (status), answers pending decisions (ask), and runs a unit through extraction, spec, plan, tasks, build, review and documentation. Runs only when the user types /migrate."
 disable-model-invocation: true
+model: claude-haiku-5-5
+effort: medium
 argument-hint: "[help | init | status | architecture | ask [unit] | <unit> [extract|spec|plan|tasks|build|review|doc]]"
 allowed-tools: "Bash(sh ${CLAUDE_SKILL_DIR}/scripts/check.sh *), Bash(git clone --no-checkout *), Bash(git -C * checkout --detach *), Bash(git -C * rev-parse HEAD)"
 ---
@@ -83,3 +85,4 @@ Print one line per stage in the chat: the stage, the state before, the state aft
 - The report to the user is in the reply language of the project CLAUDE.md (pt-BR in the migration project). It names the unit, the stages run, the final states, the open items and each `NEEDS` line.
 - Every `status` run prints the deadline (`deadline` in MIGRATION.md). An `OVERDUE` deadline goes into the report as a warning. A deadline sets priority and scope, never fidelity (`references/routing.md`, Deadline).
 - Commits, pushes and pull requests are outside this skill. Make them only when the user asks in those words, and never on `main` or `master`.
+- Productivity (conduct rule 12): dispatch only the stage that the state calls for; never re-run a stage that is OK or ask again a decision already answered; report a deadline risk as soon as `check.sh status` shows it.

@@ -89,7 +89,7 @@ Practice for code that runs on CPython. The baseline is Python 3.12, the floor o
 
 ## 8. Quality gate
 
-Run each command, read its result, and report the real output. A gate that did not run is not a pass.
+Run each command, read its result, and report the real output. A gate that did not run is not a pass. This gate is the default of a migration to Python: the planner records each tool it names as an `ID-` with `status: proposed`, with its version and URL, and does not ask the user for it.
 
 1. `python --version`: 3.12 or later, matching the declared minimum. Run here: `Python 3.14.6`.
 2. Install from the repository's lock or requirements file, with the command the repository documents.

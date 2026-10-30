@@ -8,7 +8,7 @@ skills:
   - migration-patterns
 color: green
 model: claude-haiku-5-5
-effort: high
+effort: medium
 ---
 
 # implementer

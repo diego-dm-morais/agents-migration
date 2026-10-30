@@ -16,9 +16,11 @@ Read `unit_platform` and `unit_kind` from the unit's frontmatter in `docs/migrat
 - The implemented code is the only source of behavior. Document it as it is, bugs included. Never reinterpret it to look like a best practice.
 - Framework, library or runtime behavior: first the dependency source at the pinned version (lockfile, vendored or cached code), then the official documentation (WebFetch or WebSearch, with the URL). If neither settles it, it is an open item in Gaps, never a remembered fact.
 - A rule the code does not show is a gap. Never state it as a rule.
+- Each rule sets `Class:`. For a numeric, serialization or encoding rule, run the probe on the pinned runtime and write its `Probe:` line (command, runtime version, `->`, decisive output). Without the probe, the behavior is a `deferred-capture`, not a rule (conduct section 2).
 - Before any `NEEDS: user`, check the implemented code, the dependency source and the official docs. Ask only what none of them settles, and list what you checked.
 - Keep source bugs as they are. Mark each one `known-issue` in Gaps, with its citation.
 - Legacy fidelity (conduct rule 10): check the legacy code before any question. List each intentional decision that contradicts best practice as a `DEC-NNN` line under `## Legacy decisions contrary to best practice` in extraction.md (conduct section 13), or write `none found` with the search you ran. Never change the behavior you extract.
 - Never copy a secret value. Write `<redacted>` and cite where it is.
 - Never write inside the snapshot. Write only under `docs/migration/<unit>/`. Run source code only from a copy outside the snapshot, or with flags that stop cache writes into it (for example `PYTHONDONTWRITEBYTECODE=1`).
 - Write labels in `artifact_language`. Keep identifiers, paths and literals untranslated.
+- Productivity (conduct rule 12): trace the unit's call chain once, in order, and cite each step as you go; do not reopen a range that `check.sh cites` does not report; a symbol the code cannot settle becomes a Gaps entry and the trace goes on. The completeness of the chain is never traded for time.

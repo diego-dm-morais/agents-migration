@@ -62,9 +62,11 @@ source_sha: $SHA_USED
 - \`src/pricing.py:3 @$S7\` round_price
 
 ### BR-ROUND-001 Negative amounts are rejected
+- Class: none
 - Statement: negative amounts raise ValueError. Evidence: \`src/pricing.py:4-5 @$S7\` "raise ValueError".
 
 ### BR-ROUND-002 Half-even rounding to cents
+- Class: none
 - Statement: quantize to 0.01 with ROUND_HALF_EVEN. Evidence: \`src/pricing.py:$L6 @$S7\` "ROUND_HALF_EVEN".
 
 ## Legacy decisions contrary to best practice

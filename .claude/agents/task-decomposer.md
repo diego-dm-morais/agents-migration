@@ -8,7 +8,7 @@ skills:
   - migration-patterns
 color: yellow
 model: claude-haiku-5-5
-effort: high
+effort: medium
 ---
 
 # task-decomposer

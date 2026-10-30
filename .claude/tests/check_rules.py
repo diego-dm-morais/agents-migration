@@ -36,6 +36,7 @@ MATRIX = {
     8: {a: ["verified:"] for a in ASK},
     9: {a: ["NEEDS: user"] for a in ASK},
     10: {a: ["rule 10", "Legacy fidelity"] for a in AG},
+    12: {a: ["rule 12", "Productivity"] for a in AG},
 }
 LANG = ["golang", "java", "python", "nodejs", "typescript", "javascript", "dotnet", "rust", "flutter"]
 

@@ -7,7 +7,7 @@ skills:
   - migration-patterns
 color: blue
 model: claude-haiku-5-5
-effort: high
+effort: medium
 ---
 
 # behavior-extractor

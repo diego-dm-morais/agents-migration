@@ -225,11 +225,13 @@ Fonte: `skills/migration-conduct/SKILL.md`, seção 0. Os números são os da co
 3. **Documentação fiel.** Documente o comportamento como o código faz, com os bugs. Não mude o comportamento para seguir boa prática.
 4. **A fonte primária é o código implementado.** Spec e docs existentes são contexto.
 5. **Docs sincronizados.** O documento da unidade guarda os hashes das fontes. Mudança no código ou num artefato-fonte deixa o documento STALE.
-6. **Investigar antes de perguntar**, nesta ordem: código; fonte da dependência; documentação oficial.
-7. **Nenhuma pergunta irrelevante.** Padrão que não muda o resultado vira registro com `blocking: no`.
+6. **Investigar antes de perguntar**, nesta ordem: o código, com testes e configuração; a fonte da dependência na versão fixada; a documentação oficial. A documentação do próprio legado é só contexto. Só depois disso se pergunta.
+7. **Nenhuma pergunta irrelevante.** Padrão que não muda o resultado vira registro com `blocking: no`. Nunca se devolve ao usuário uma investigação que o agente pode fazer.
 8. **Cada pergunta diz o que foi checado** e por que a resposta não está nas fontes.
 9. **Pergunta bloqueante sem resposta** para a unidade com `NEEDS: user: <pergunta, entre aspas>`. Nunca escolha o comportamento sozinho.
-10. **Fidelidade ao legado.** O código legado é a fonte da verdade: seu comportamento e suas decisões são preservados, mesmo quando contrariam boa prática ou padrões recomendados do alvo. Não se muda o legado para seguir boa prática por iniciativa própria. Cada decisão legada que contraria boa prática vira um ADR, com a razão de manter o comportamento (seção 13).
+10. **Fidelidade ao legado (prioridade absoluta).** A equivalência funcional vem antes de boa prática, estilo ou velocidade. O código legado responde antes de qualquer pergunta e é a fonte da verdade: seu comportamento, suas regras, validações e decisões são preservados, mesmo quando contrariam boa prática ou padrões recomendados do alvo. Não se muda o legado para seguir boa prática por iniciativa própria. Cada decisão legada que contraria boa prática e precisa ser mantida vira um ADR, com a razão de manter o comportamento (seção 13).
+11. **Sem criatividade no alvo.** Os agentes não inventam comportamento, regra, campo, estado, rota, evento, texto ou layout que o legado não implementa. Lacuna vira entrada em `Gaps` ou PEND com `blocking: yes`, nunca suposição.
+12. **Produtividade dentro do prazo.** Cada decisão e entrega é conferida contra as fontes antes de sair. Não se repete análise, não se fazem perguntas desnecessárias e não se constrói o que nenhum requisito pede. A ordem segue o caminho crítico do `deadline`. Prazo e velocidade nunca reduzem fidelidade funcional nem qualidade técnica.
 
 ## Escada de evidência de paridade
 

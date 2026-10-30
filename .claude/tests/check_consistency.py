@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Cross-file consistency of the toolkit: agent names and aliases, owner permissions, stage names,
-the final-message keys, language skill names, id prefixes, and paths cited in the docs.
+the final-message keys, language skill names, id prefixes, the numbered mandatory rules, and paths cited in the docs.
 Usage: check_consistency.py <claude dir>. Exit 0 when every check passes, 1 otherwise."""
 import glob, os, re, sys
 
@@ -95,6 +95,20 @@ for doc in sorted(glob.glob(os.path.join(root, "docs", "*.md"))) + [os.path.join
             continue
         ok = os.path.exists(os.path.join(root, p)) or os.path.exists(os.path.join(project, p))
         check(f"path {p} cited in {os.path.basename(doc)}", ok, "does not exist")
+
+# 9. mandatory rules: CLAUDE.md and the conduct section 0 carry the same numbers and the same titles
+def rule_titles(text):
+    """Number and first two words of each numbered rule in a rules list."""
+    return {int(n): " ".join(w.strip("*.(") for w in (a, b))
+            for n, a, b in re.findall(r"(?m)^(\d+)\. \**(\S+) (\S+)", text)}
+
+
+mandatory = claude_md.split("## Mandatory rules", 1)[-1].split("## Project memory", 1)[0]
+section0 = conduct.split("## 0. Mandatory rules", 1)[-1].split("## 1. Goal", 1)[0]
+claude_rules, conduct_rules = rule_titles(mandatory), rule_titles(section0)
+check("mandatory rules: CLAUDE.md and conduct section 0 agree on numbers and titles",
+      sorted(claude_rules) == list(range(1, 13)) and claude_rules == conduct_rules,
+      f"CLAUDE.md {claude_rules} / conduct {conduct_rules}")
 
 print("consistency:", "PASS" if not fails else f"FAIL ({len(fails)})")
 sys.exit(0 if not fails else 1)

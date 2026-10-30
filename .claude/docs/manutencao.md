@@ -25,7 +25,7 @@ Os agentes são despachados pelo `/migrate`. Você chama um agente direto só qu
 
 O **frontmatter** é o bloco de metadados no topo do arquivo, entre duas linhas `---`. Ele diz o nome, a descrição e as ferramentas do agente.
 
-As chaves dos agentes atuais são `name`, `description`, `tools`, `skills`, `color` e `effort`. Este é o formato de referência. Ele fica em inglês, como o frontmatter dos agentes atuais (`agents/*.md`):
+As chaves dos agentes atuais são `name`, `description`, `tools`, `skills`, `color`, `model` e `effort`. Este é o formato de referência. Ele fica em inglês, como o frontmatter dos agentes atuais (`agents/*.md`):
 
 ```yaml
 ---
@@ -35,15 +35,16 @@ tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 skills:
  - migration-conduct
 color: pink
-effort: xhigh
+model: claude-haiku-5-5
+effort: medium
 ---
 ```
 
 - `name` é igual ao nome do arquivo `agents/<nome>.md`.
 - `description` começa com `Alias: <Nome>.`, como nos sete agentes. Use aspas duplas. O texto tem `: `, e um valor sem aspas com `: ` quebra o parser YAML (o programa que lê o YAML).
 - `color` é uma das cores em uso hoje: `blue`, `cyan`, `green`, `orange`, `purple`, `red` e `yellow`. `pink` está livre.
-- `effort` é `xhigh`, como nos sete agentes.
-- Nenhum dos sete agentes declara `model`.
+- `effort` é `medium`, como nos sete agentes e em `migrate`.
+- `model` é `claude-haiku-5-5` nos sete agentes e em `migrate`. O gate (`tests/gate_format.py`, `PINNED_MODEL` e `PINNED_EFFORT`) recusa qualquer outro valor.
 - Os agentes atuais não listam `mcp__*`, `AskUserQuestion` nem `Agent` em `tools`. Pergunta ao usuário passa pelo `NEEDS`, e quem despacha é o orquestrador (`skills/migrate/references/routing.md`).
 
 ### Ferramentas e skills
@@ -313,7 +314,7 @@ Nada disso existe hoje. O formato do hook segue a documentação do Claude Code,
 
 - **Empacotamento como plugin não feito.** Não há manifesto de plugin em `.claude/`. O help de `claude plugin validate` cita `plugin.json` na opção `--profile` (`claude plugin validate --help`).
 - **Repositório git.** `agents` tem `.git` (branch `master`, sem commit). `.claude/` aparece como não rastreado (`git status`). O `.gitignore` do workspace ignora só `.claude/memory/` (decisão de 2026-10-29). Falta o primeiro commit, que só sai se você pedir.
-- **Gate de formato no toolkit.** `tests/gate_format.py` confere o frontmatter de agentes e skills, inclusive YAML estrito. `sh tests/run-tests.sh` roda o gate e os testes do `check.sh`. Ele também confere o orçamento dos agentes: até 100 linhas e 7 KiB cada, e 43 KiB no total (veja `convencoes.md`, seção Tamanhos).
+- **Gate de formato no toolkit.** `tests/gate_format.py` confere o frontmatter de agentes e skills, inclusive YAML estrito. `sh tests/run-tests.sh` roda o gate e os testes do `check.sh`. Ele também confere o modelo e o effort fixados (agentes e `migrate`) e o orçamento dos agentes: até 100 linhas e 7 KiB cada, e 43 KiB no total (veja `convencoes.md`, seção Tamanhos).
 - **Testes do check.sh no toolkit.** Ficam em `tests/`.
   - `test-adr.sh` confere sozinho o subcomando `adr`, o estado do `plan`, o do `extract` e a linha de ADR da `doc`, e define o status de saída.
   - `test-deadline.sh` confere sozinho o subcomando `deadline` e a linha de prazo do `status`, com `CHECK_TODAY` fixo.

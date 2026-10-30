@@ -84,12 +84,13 @@ Notas:
 
 | Chave | Onde aparece | Valor |
 |---|---|---|
-| `name` | 14 skills | igual ao nome da pasta |
-| `description` | 14 skills | texto que diz quando usar a skill |
+| `name` | 21 skills | igual ao nome da pasta |
+| `description` | 21 skills | texto que diz quando usar a skill |
 | `user-invocable` | 4 skills | `false`: `doc-writing`, `migration-conduct`, `migration-patterns`, `tdd` |
 | `disable-model-invocation` | `migrate` | `true`: só o usuário a chama |
 | `argument-hint` | `migrate` | lista de argumentos |
-| `allowed-tools` | `migrate` | libera só `check.sh` por `sh` |
+| `allowed-tools` | `migrate` e `gh-check` | libera só `check.sh` (`migrate`) e `check-gh.sh` (`gh-check`), por `sh` |
+| `model` e `effort` | `migrate` | `claude-haiku-5-5` e `medium`, travados pelo gate (`PINNED_MODEL`, `PINNED_EFFORT`) |
 | `metadata` | 9 skills de linguagem | `baseline` (versão da linguagem) e `verified` (data da checagem) |
 
 ### Agentes (`agents/<nome>.md`)
@@ -101,8 +102,8 @@ Notas:
 | `tools` | lista separada por vírgula |
 | `skills` | lista em linhas próprias; pré-carrega as skills |
 | `color` | cor do agente |
-| `model` | `claude-haiku-5-5` nos 7 agentes. Decisão de 2026-10-30; o gate (`tests/gate_format.py`, `PINNED_MODEL`) aceita só esse valor |
-| `effort` | `high` nos 7 agentes (decisão de 2026-10-30) |
+| `model` | `claude-haiku-5-5` nos 7 agentes e em `migrate`. Decisão de 2026-10-30; o gate (`tests/gate_format.py`, `PINNED_MODEL`) aceita só esse valor e exige que ele esteja presente |
+| `effort` | `medium` nos 7 agentes e em `migrate` (decisão de 2026-10-30, que troca o `high` do mesmo dia). O gate (`PINNED_EFFORT`) exige esse valor |
 
 Os sete agentes pré-carregam `migration-conduct` no campo `skills`.
 
@@ -159,11 +160,11 @@ A tabela mostra a medida do estado atual, feita em 2026-10-30. Ela não é uma r
 
 | Arquivo | Medida atual |
 |---|---|
-| `agents/*.md` (7) | de 38 a 54 linhas; de 3.708 a 5.511 bytes; 33.151 bytes no total (maior em bytes: `agents/migration-planner.md`; maior em linhas: `agents/doc-writer.md`) |
-| `skills/migrate/references/agent-rules/*.md` (7) | de 2.299 a 4.827 bytes (regras, bloco de UI e modo de arquitetura de cada agente, fora do orçamento do gate) |
-| `skills/*/SKILL.md` (14) | de 79 a 170 linhas (menor: `skills/migrate/SKILL.md`; maior: `skills/flutter/SKILL.md`) |
-| `skills/*/references/*.md` | até 260 linhas (maior: `skills/migrate/references/templates.md`) |
-| `description` | até 332 caracteres, com aspas (`skills/nodejs/SKILL.md`) |
+| `agents/*.md` (7) | de 38 a 54 linhas; de 3.710 a 5.513 bytes; 33.165 bytes no total (maior em bytes: `agents/migration-planner.md`; maior em linhas: `agents/doc-writer.md`) |
+| `skills/migrate/references/agent-rules/*.md` (7) | de 2.526 a 5.415 bytes (regras, bloco de UI e modo de arquitetura de cada agente, fora do orçamento do gate) |
+| `skills/*/SKILL.md` (21) | de 17 a 190 linhas (menor: `skills/gh-check/SKILL.md`; maior: `skills/migration-conduct/SKILL.md`) |
+| `skills/*/references/*.md` (81) | até 348 linhas (maior: `skills/migrate/references/templates.md`) |
+| `description` | até 431 caracteres, com aspas (`skills/kotlin/SKILL.md`) |
 
 ### Pendências
 
@@ -199,8 +200,8 @@ Cada tipo de regra tem um lugar próprio. Nenhum deles repete o conteúdo do out
 
 | Lugar | Arquivo | O que guarda | Quando é lido |
 |---|---|---|---|
-| Regras curtas do projeto | `CLAUDE.md` (40 linhas) | idioma, comandos, agentes e aliases, skills de linguagem, as dez regras em resumo, memória do projeto em `.claude/memory/` | no início de cada sessão |
-| Regras compartilhadas | `skills/migration-conduct/SKILL.md` (134 linhas) | paridade, evidência, escada de evidência, lacunas, marcadores, ids, segredos, verificação, idioma, mensagem final, decisões legadas e ADR | pré-carregada pelos sete agentes |
+| Regras curtas do projeto | `CLAUDE.md` (66 linhas) | idioma, comandos, agentes e aliases, skills de linguagem, configuração de execução (modelo e effort), as doze regras em resumo, memória do projeto em `.claude/memory/` | no início de cada sessão |
+| Regras compartilhadas | `skills/migration-conduct/SKILL.md` (190 linhas) | paridade, evidência, escada de evidência, lacunas, marcadores, ids, segredos, verificação, idioma, mensagem final, decisões legadas e ADR | pré-carregada pelos sete agentes |
 | Papel de cada agente | `agents/*.md` | entradas, procedimento ou modos, regras do papel, mensagem final | quando o agente é despachado |
 | Prática | `skills/<nome>/SKILL.md` e `references/` | método, orquestração (`migrate`), armadilhas por linguagem | pelo campo `skills`, pela chamada de skill ou pelo orquestrador |
 | Leitura humana | `.claude/docs/` | explicação para quem usa ou mantém o toolkit | pelas pessoas |

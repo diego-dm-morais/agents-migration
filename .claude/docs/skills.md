@@ -37,7 +37,7 @@ Estas formas estão definidas em `skills/migrate/SKILL.md`:
 
 Os agentes são despachados pelo `/migrate`. Chame um agente direto só quando o usuário pedir pelo nome ou pelo apelido (`CLAUDE.md`).
 
-### As dez regras obrigatórias
+### As doze regras obrigatórias
 
 As regras estão em `skills/migration-conduct/SKILL.md`, seção 0. Elas são o coração do toolkit. Este é o resumo, com os mesmos números:
 
@@ -46,11 +46,13 @@ As regras estão em `skills/migration-conduct/SKILL.md`, seção 0. Elas são o 
 3. **Documentação fiel.** O comportamento é documentado como o código o implementa, com os bugs, marcados como `known-issue`.
 4. **Fonte primária é o código implementado.** Spec e docs existentes são contexto, não fonte de comportamento.
 5. **Docs em sincronia.** Se o código ou um artefato-fonte muda, a doc fica `STALE` e precisa ser gerada de novo antes do fim da unidade.
-6. **Investigar antes de perguntar.** A ordem é: o código; a fonte da dependência na versão fixada; a documentação oficial.
-7. **Sem pergunta irrelevante.** Não se pergunta o que o código, a biblioteca ou um default responderia. O default é registrado com `blocking: no`.
+6. **Investigar antes de perguntar.** A ordem é: o código, com testes e configuração; a fonte da dependência na versão fixada; a documentação oficial. A documentação do próprio legado é só contexto. Só depois disso se pergunta.
+7. **Sem pergunta irrelevante.** Não se pergunta o que o código, a biblioteca ou um default responderia, nem se devolve ao usuário uma investigação que o agente pode fazer. O default é registrado com `blocking: no`.
 8. **Toda pergunta diz o que foi verificado**, com caminhos, linhas ou URLs.
-9. **Pergunta bloqueante sem resposta** para a unidade com `NEEDS: user: <question, quoted>`. O agente nunca escolhe o comportamento sozinho.
-10. **Fidelidade ao legado.** Não se pergunta ao usuário o que o código legado responde. O legado é a fonte da verdade: seu comportamento e suas decisões são preservados, mesmo quando contrariam boa prática. Cada decisão legada que contraria boa prática vira um ADR (seção 13).
+9. **Pergunta bloqueante sem resposta** para a unidade com `NEEDS: user: <pergunta, entre aspas>`. O agente nunca escolhe o comportamento sozinho.
+10. **Fidelidade ao legado (prioridade absoluta).** A equivalência funcional vem antes de boa prática, estilo ou velocidade. O código legado responde antes de qualquer pergunta e é a fonte da verdade: seu comportamento, suas regras, validações e decisões são preservados, mesmo quando contrariam boa prática. Cada decisão legada que contraria boa prática e deve ser mantida vira um ADR (seção 13).
+11. **Sem criatividade no alvo.** Os agentes não inventam comportamento, regra, campo, estado, rota, evento, texto ou layout que o legado não implementa. Uma lacuna vira `Gaps` ou PEND com `blocking: yes`, nunca suposição.
+12. **Produtividade dentro do prazo.** Cada decisão e entrega é conferida contra as fontes antes de sair. Não se repete análise, não se fazem perguntas desnecessárias e não se constrói o que nenhum requisito pede. A ordem segue o caminho crítico do `deadline`. Prazo e velocidade nunca reduzem fidelidade funcional nem qualidade técnica.
 
 A seção 13 da conduta define as decisões legadas: `DEC-NNN` na extração e `ADR-NNN` em `docs/migration/adr/`. A seção 12 define o contrato da mensagem final.
 

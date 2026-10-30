@@ -115,7 +115,7 @@ func TestMathRound(t *testing.T) {
 
 ## 8. Quality gate
 
-Run each command, read its result, and report the real output. A gate that did not run is not a pass. Probe results are from go1.26.0 windows/amd64 on 2026-10-29.
+Run each command, read its result, and report the real output. A gate that did not run is not a pass. Probe results are from go1.26.0 windows/amd64 on 2026-10-29. This gate is the default of a migration to Go: the planner records each tool it names as an `ID-` with `status: proposed`, with its version and URL, and does not ask the user for it.
 
 1. `gofmt -l .` must print nothing. Probe: no output.
 2. `go vet ./...` must exit 0. Probe: exit 0.
@@ -154,6 +154,12 @@ A file without a final newline fails `gofmt -l`. In the probe, `go mod tidy` rew
 - Comparing errors by their message text instead of with `errors.Is` or `errors.As`.
 - `%v` in `fmt.Errorf` where the error chain must be kept. Use `%w`.
 - A table-driven test that checks only the happy path of a rounding or parsing rule.
+
+## Version deltas (older source lines)
+
+Read this section only when the source's `go` line (in `go.mod`) is older than the baseline above (Go 1.26). Each entry gives the release it changed in, its official URL and the probe that shows it. A behavior of an older line that this section does not list is not stated from this skill: verify it on the toolchain the source pins, or record it as a `deferred-capture` (conduct section 1a).
+
+- go1.22: a `for` loop variable is new in each iteration when the `go` line of `go.mod` is 1.22 or later (https://go.dev/doc/go1.22). Probe on go1.26.0 windows/amd64: `0 1 2` with `go 1.22`, `3 3 3` with `go 1.21` (section 1).
 
 ## Library registry
 

@@ -52,13 +52,13 @@ Cada agente escreve a saída de uma etapa. Os apelidos vêm de `CLAUDE.md`, seç
 | `parity-reviewer` | Rafael | `review` | `docs/migration/<unidade>/review.md` | `migration-conduct`, `migration-patterns` | Read, Grep, Glob, Bash, Write, Skill, WebFetch, WebSearch |
 | `doc-writer` | Daniela | `doc` | `<doc_root>/<unidade>.md` | `migration-conduct`, `doc-writing` | Read, Grep, Glob, Bash, Write, Edit, Skill |
 
-O campo `skills:` carrega as skills do agente ao iniciar. Um exemplo está em `agents/spec-writer.md`. Todos os agentes usam `effort: xhigh`, que é o nível de esforço do modelo (`agents/spec-writer.md` e as linhas equivalentes dos outros seis).
+O campo `skills:` carrega as skills do agente ao iniciar. Um exemplo está em `agents/spec-writer.md`. Todos os agentes usam `effort: medium`, que é o nível de esforço do modelo (`agents/spec-writer.md` e as linhas equivalentes dos outros seis).
 
 ### Skills compartilhadas
 
 Quatro skills têm `user-invocable: false`. Isso quer dizer que você não as chama. Só os agentes as carregam.
 
-- `migration-conduct` (`skills/migration-conduct/SKILL.md`): regras comuns a todos os agentes. Tem as dez regras obrigatórias (seção 0), a conduta de paridade e as evidências (seções 1 a 3), as lacunas e conflitos (seção 4), os marcadores (seção 5), o escopo e os segredos (seção 6), os ids (seção 7), a verificação (seção 8), o idioma (seção 9), as skills de linguagem (seção 10), as regras de parada (seção 11), o contrato da mensagem final (seção 12) e as decisões legadas e os ADR (seção 13). Os sete agentes a carregam.
+- `migration-conduct` (`skills/migration-conduct/SKILL.md`): regras comuns a todos os agentes. Tem as doze regras obrigatórias (seção 0), a conduta de paridade e as evidências (seções 1 a 3), as lacunas e conflitos (seção 4), os marcadores (seção 5), o escopo e os segredos (seção 6), os ids (seção 7), a verificação (seção 8), o idioma (seção 9), as skills de linguagem (seção 10), as regras de parada (seção 11), o contrato da mensagem final (seção 12) e as decisões legadas e os ADR (seção 13). Os sete agentes a carregam.
 - `migration-patterns` (`skills/migration-patterns/SKILL.md`): categorias de armadilhas que a migração deve checar entre a linguagem de origem e a de destino. São elas: números, texto e codificação, tempo e fusos, valores ausentes, igualdade e ordem, erros, concorrência, serialização, entrada e saída e recursos, configuração, aleatoriedade e relógios, e localidade. Carregada por `behavior-extractor`, `migration-planner` e `parity-reviewer`.
 - `tdd` (`skills/tdd/SKILL.md`): método de escrever o teste antes do código (TDD, de *test-driven development*). Inclui nomes de teste com o id da especificação, testes de caracterização contra a origem, isolamento de dependências externas nos testes unitários e a checagem de cobertura. Carregada por `task-decomposer` e `implementer`.
 - `doc-writing` (`skills/doc-writing/SKILL.md`): fluxo de escrita da documentação em três estágios, sem perguntas ao usuário: coleta de contexto, redação seção por seção e autoteste de leitura. Carregada por `doc-writer`.
@@ -224,7 +224,7 @@ Esta seção lista os recursos do Claude Code que o toolkit aproveita. O toolkit
 | Ferramenta `Agent` | `skills/migrate/SKILL.md` | Despacha o agente de uma etapa. `subagent_type` é o nome do dono. |
 | Ferramenta `Skill` | `agents/behavior-extractor.md`, `agents/migration-planner.md`, `agents/parity-reviewer.md`, `agents/implementer.md`, `agents/doc-writer.md` | Carrega uma skill de linguagem pelo nome, quando o agente precisa dela. |
 | Campo `skills:` no frontmatter | `agents/spec-writer.md`, e os outros seis agentes | Carrega as skills compartilhadas ao iniciar o agente. |
-| Campos `tools:`, `color:` e `effort:` | `agents/*.md` | `tools:` limita as ferramentas de cada agente; `color:` é a cor do agente; `effort: xhigh` vale para os sete. |
+| Campos `tools:`, `color:` e `effort:` | `agents/*.md` | `tools:` limita as ferramentas de cada agente; `color:` é a cor do agente; `effort: medium` vale para os sete. |
 | Ferramentas `WebFetch` e `WebSearch` | `agents/behavior-extractor.md`, `agents/migration-planner.md`, `agents/parity-reviewer.md` | Consultam a documentação oficial, com URL, quando a dependência na versão fixada não responde. |
 | `CLAUDE.md` | `CLAUDE.md` | Instrução do projeto: idioma, toolkit e regras obrigatórias. Tem precedência sobre o `CLAUDE.md` global, no que conflita. |
 | `disable-model-invocation: true` | `skills/migrate/SKILL.md` | O modelo não aciona `/migrate` sozinho. Só você digita o comando. |
@@ -247,17 +247,19 @@ Esta seção mostra as regras de convivência entre as peças.
 
 - **Quem decide o quê.** O orquestrador decide a ordem e o despacho. Cada agente decide como escrever a saída da sua etapa. Uma etapa escreve só o próprio artefato. Código só é escrito no `build` (`skills/migrate/references/stages.md`).
 - **Entrada de cada agente.** O agente lê os artefatos anteriores que o prompt indica. Por exemplo, `spec-writer` lê `extraction.md` e `MIGRATION.md`, e só começa se a extração estiver `status: ok` (`agents/spec-writer.md`).
-- **Regras comuns.** As dez regras obrigatórias valem para todos os agentes, pela skill `migration-conduct` (`CLAUDE.md`). Em resumo, com o número de cada uma:
+- **Regras comuns.** As doze regras obrigatórias valem para todos os agentes, pela skill `migration-conduct` (`CLAUDE.md`). Em resumo, com o número de cada uma:
   1. Sem alucinação: toda afirmação sobre o comportamento da origem cita `path:line @sha7`, aberto nesta execução.
   2. Sem regra inventada: `BR-` sem citação e `FR-` sem `Source: BR-` são defeito. O `check.sh` rejeita os dois.
   3. Documentação fiel: o comportamento é descrito como o código o implementa, com os bugs, marcados como `known-issue`.
   4. A fonte primária é o código implementado. Especificação e documentação existente são contexto.
   5. Documentação em dia: o doc guarda os hashes das fontes. Quando algo muda, ele fica STALE e é regenerado.
-  6. Investigar antes de perguntar: código, fonte da dependência e documentação oficial, nesta ordem.
-  7. Nenhuma pergunta irrelevante: o default é registrado com `blocking: no`.
+  6. Investigar antes de perguntar: código (com testes e configuração), fonte da dependência e documentação oficial, nesta ordem. A documentação do legado é só contexto.
+  7. Nenhuma pergunta irrelevante: o default é registrado com `blocking: no`. Nunca se devolve ao usuário uma investigação que o agente pode fazer.
   8. Toda pergunta diz o que foi verificado.
   9. Pergunta bloqueante sem resposta para a unidade, com `NEEDS: user: <pergunta>`.
-  10. Fidelidade ao legado: o código legado responde antes de qualquer pergunta. Decisão legada que contraria boa prática é preservada e registrada em ADR (seção 13 da conduta).
+  10. Fidelidade ao legado, com prioridade absoluta: a equivalência funcional vem antes de boa prática, estilo ou velocidade. Decisão legada que contraria boa prática é preservada e registrada em ADR (seção 13 da conduta).
+  11. Sem criatividade no alvo: nada é inventado que o legado não implemente. Lacuna vira `Gaps` ou PEND bloqueante.
+  12. Produtividade dentro do prazo: cada entrega é conferida contra as fontes, sem análise repetida nem construção desnecessária. Prazo e velocidade não reduzem fidelidade nem qualidade técnica.
 - **Lacunas.** Um fato técnico que falta reabre a extração, sem parar a cadeia. Uma regra de negócio que a origem não resolve para a cadeia com `NEEDS: user` (`skills/migration-conduct/SKILL.md`, seção 4).
 - **Pedidos entre agentes.** Um agente só pede ao dono que a tabela permite. `spec-writer` pede fato técnico ao `behavior-extractor`. `task-decomposer` pede ao `migration-planner` ou ao `spec-writer`. `parity-reviewer` pede correção ao `implementer` (`skills/migrate/references/routing.md`). Outro dono faz a unidade parar.
 - **Decisões legadas.** O `behavior-extractor` lista cada DEC em `extraction.md`. O `migration-planner` escreve um ADR por DEC. O `task-decomposer` cria um teste por decisão preservada, com o id do ADR no nome. O `implementer` mantém o comportamento legado. O `parity-reviewer` reporta DEC sem ADR como achado de severidade alta, pelo `check.sh adr`. O `doc-writer` documenta cada ADR (`skills/migration-conduct/SKILL.md`, seção 13).

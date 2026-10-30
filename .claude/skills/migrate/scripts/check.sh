@@ -7,6 +7,7 @@
 #   sh check.sh pin             snapshot HEAD must equal source_sha
 #   sh check.sh deadline        project deadline of MIGRATION.md: none, or the days left (OVERDUE when passed)
 #   sh check.sh preflight       runtimes and docker images the unit needs on this machine (OK, MISSING, UNKNOWN, WAIVED)
+#   sh check.sh probes <unit>   each rule declared numeric, serialization or encoding has a Probe line with its output
 #   sh check.sh cites <file>    each path:line @sha7 resolves in the snapshot; each quoted snippet is inside its range
 #   sh check.sh symbols <file>  each backticked identifier next to a citation appears in the cited file (advisory)
 #   sh check.sh env             env and config names the source reads, with path:line; never values (heuristic)
@@ -326,6 +327,35 @@ quotes_bad() {
   done
 }
 
+# rules_without_probe <extraction>: " no-class-<BR id>" for each rule block without a valid "- Class:" line
+# (none, numeric, serialization or encoding); " no-probe-<BR id>" for each rule declared numeric, serialization or
+# encoding that has no "- Probe:" line with its command and decisive output ("->").
+rules_without_probe() {
+  [ -f "$1" ] || return 0
+  tr -d '\r' < "$1" | awk '
+    function flush() {
+      if (cur != "") {
+        if (!any) printf " no-class-%s", cur
+        else if (cls && !prb) printf " no-probe-%s", cur
+      }
+      cur = ""; any = 0; cls = 0; prb = 0
+    }
+    /^### BR-/ { flush(); cur = $2; sub(/:$/, "", cur); next }
+    /^### / { flush(); next }
+    cur != "" && /^- Class: *(none|numeric|serialization|encoding)/ { any = 1 }
+    cur != "" && /^- Class: *(numeric|serialization|encoding)/ { cls = 1 }
+    cur != "" && /^- Probe: .*->/ { prb = 1 }
+    END { flush() }'
+}
+
+# do_probes <unit>: one line, "<unit> probes OK|INVALID", for the rules declared measurable in the extraction
+do_probes() {
+  f="docs/migration/$1/extraction.md"
+  [ -f "$f" ] || { echo "$1 probes MISSING"; return; }
+  bad=$(rules_without_probe "$f")
+  if [ -z "$bad" ]; then echo "$1 probes OK -"; else echo "$1 probes INVALID$bad"; fi
+}
+
 # frs_without_source <spec>: " no-source-<FR id>" for each FR block without "Source: BR-"
 frs_without_source() {
   [ -f "$1" ] || return 0
@@ -424,7 +454,7 @@ check_artifact() {
   done
   case "$s" in
     extract)
-      bad="$bad$(dup_ids "$f")$(cites_tokens "$f")$(rules_without_evidence "$f")$(rules_without_quote "$f")$(dec_issues "$f")"
+      bad="$bad$(dup_ids "$f")$(cites_tokens "$f")$(rules_without_evidence "$f")$(rules_without_quote "$f")$(rules_without_probe "$f")$(dec_issues "$f")"
       es=$(fm "$f" source_sha)
       if [ -z "$es" ]; then bad="$bad source_sha-absent"
       elif [ "$es" != "$(fm "$MIG" source_sha)" ]; then stale="$stale source_sha"
@@ -745,7 +775,7 @@ do_preflight() {
 }
 
 usage() {
-  echo "usage: sh check.sh status [unit] | pin | deadline | preflight | cites <file> | symbols <file> | env | ids [unit] | adr [unit] | hash <file> | hash-full <file> | show <unit> <stage> <id>... | scope <unit>" >&2
+  echo "usage: sh check.sh status [unit] | pin | deadline | preflight | probes <unit> | cites <file> | symbols <file> | env | ids [unit] | adr [unit] | hash <file> | hash-full <file> | show <unit> <stage> <id>... | scope <unit>" >&2
   exit 2
 }
 
@@ -788,6 +818,10 @@ case "$cmd" in
     do_show "$@" ;;
   preflight) do_preflight ;;
   contract) do_contract ;;
+  probes)
+    [ $# -eq 1 ] || usage
+    valid_unit "$1" || { echo "unit INVALID $1"; exit 0; }
+    do_probes "$1" ;;
   scope)
     [ $# -eq 1 ] || usage
     valid_unit "$1" || { echo "unit INVALID $1"; exit 0; }

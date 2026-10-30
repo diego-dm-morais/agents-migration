@@ -97,7 +97,7 @@ Cada assunto tem uma regra completa. Use a tabela abaixo para achar o arquivo ce
 | Donos das etapas e limites de despacho | `skills/migrate/references/routing.md` |
 | Decisões: fato, padrão de conduta ou escolha do usuário | `skills/migrate/references/ask.md` |
 | Formatos dos artefatos, ids e o modelo de ADR | `skills/migrate/references/templates.md` |
-| As dez regras obrigatórias, o contrato da mensagem final e as decisões legadas (DEC e ADR) | `skills/migration-conduct/SKILL.md`, seções 0, 12 e 13 |
+| As doze regras obrigatórias, o contrato da mensagem final e as decisões legadas (DEC e ADR) | `skills/migration-conduct/SKILL.md`, seções 0, 12 e 13 |
 | Agentes, um por dono de etapa | `agents/*.md` |
 | Regras de cada linguagem (golang, java, python, nodejs, typescript, javascript, dotnet, rust e flutter) | `skills/<linguagem>/SKILL.md` |
 | Lógica dos estados e das verificações | `skills/migrate/scripts/check.sh` |
