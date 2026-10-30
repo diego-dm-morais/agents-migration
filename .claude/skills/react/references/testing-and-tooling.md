@@ -51,7 +51,7 @@ test('BR-UI-001 shows the initial count', () => {
 - Prefer user-facing locators, for example `page.getByRole('button', { name: 'submit' })`. The guide recommends them over XPath or CSS selectors (same page).
 - Use web-first assertions such as `toBeVisible()`. They retry until the condition holds. The guide warns against `expect(await locator.isVisible()).toBe(true)`, because it does not wait (same page).
 - Keep `@playwright/test` current with the version the project pins. The guide points to the release notes for the newest release (same page). The exact version is not verified offline.
-- Run one file with `npx playwright test e2e/checkout.spec.ts`. Not verified offline: flag list; read `npx playwright test --help`.
+- Run one file with `npx playwright test e2e/checkout.spec.ts`. Non-option arguments are regular expressions matched against the test file path; `-g`/`--grep` filters test titles and `--project` selects projects (https://playwright.dev/docs/test-cli).
 - Record the browser and the base URL in the report.
 
 ## Gate commands

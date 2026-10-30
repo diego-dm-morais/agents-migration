@@ -1,6 +1,8 @@
 {
   "enabledPlugins": {
-    "claude-mem@thedotmack": false
+    "claude-mem@thedotmack": false,
+    "superpowers@claude-plugins-official": false,
+    "andrej-karpathy-skills@karpathy-skills": false
   },
   "hooks": {
     "SessionStart": [
@@ -10,6 +12,16 @@
           {
             "type": "command",
             "command": "cd \"$CLAUDE_PROJECT_DIR\" && sh .claude/skills/migrate/scripts/check.sh status"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && sh .claude/skills/migrate/scripts/check.sh contract"
           }
         ]
       }

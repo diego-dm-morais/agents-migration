@@ -23,7 +23,7 @@ Read this when you map a source UI construct to React Native code. The left colu
 | Shared state | the project's chosen store, verified in its docs | the store's update order; not verified offline for any specific library |
 | Side effects | `useEffect` with a cleanup return | the cleanup runs on unmount; a listener without cleanup leaks |
 | Async action after leaving a screen | check whether the component is still mounted in the cleanup, or ignore the result | the source's observable output when the user leaves during a request |
-| Text | `Text` around every string | a string outside `Text` is not verified offline: check the Text page |
+| Text | `Text` around every string | a text node directly under a `View` raises an exception (https://reactnative.dev/docs/text) |
 | Locale and date output | the source's formatter, tested on the device engine | `Intl` and `Date` support is not stated on the environment page (https://reactnative.dev/docs/javascript-environment) |
 | Numbers | JavaScript number rules from the `javascript` skill | IEEE-754 doubles; rounding ties |
 | Errors | one error class per source error, with the source message | an unhandled promise rejection is not a source behavior unless the source has one |

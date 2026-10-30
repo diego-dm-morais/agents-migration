@@ -40,8 +40,8 @@ Practice for React and Next.js UI code, used when React or Next.js is the source
 - Effects run after commit. The cleanup of the previous Effect runs before the next setup, and once more on unmount (same page).
 - In development with Strict Mode, React runs one extra setup and cleanup cycle before the first real setup. The cleanup must undo the setup (same page).
 - Event handlers belong in event handlers, not in Effects, when the trigger is a user action (https://react.dev/learn/you-might-not-need-an-effect).
-- Custom hooks reuse stateful logic and keep the name starting with `use` (https://react.dev/learn/reusing-logic-with-custom-hooks). Not verified offline: exact wording of this page.
-- Data fetching in Client Components: the Next.js docs show Server Components fetching and streaming with the `use` API (https://nextjs.org/docs/app/getting-started/server-and-client-components). Other fetch patterns: not verified offline.
+- Custom hooks reuse stateful logic and keep the name starting with `use` (https://react.dev/learn/reusing-logic-with-custom-hooks). The page says custom hooks share stateful logic but not state itself, and hook names must start with `use` followed by a capital letter.
+- Data fetching in Client Components: the Next.js docs show Server Components fetching and streaming with the `use` API, and community libraries SWR and React Query for Client Components (https://nextjs.org/docs/app/getting-started/fetching-data).
 
 ```tsx
 'use client'

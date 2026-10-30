@@ -23,7 +23,7 @@ Read this when you map a source construct to React or Next.js code. The left col
 | Clickable element | a native `button`; a link is an `a` | keyboard activation; the role the source exposes |
 | Text and i18n | the source's message keys; `Intl` for dates and numbers | locale and time zone of the output; key names kept |
 | Styling | the project's existing CSS approach; record any visual change as `deviation` | breakpoints and spacing; the source's visual state |
-| Error display | the nearest `error` file for route errors (not verified offline: read https://nextjs.org/docs/app/getting-started/error-handling) | the source's message text; the status code |
+| Error display | the nearest `error` file for route errors (https://nextjs.org/docs/app/getting-started/error-handling) | the source's message text; the status code |
 
 - Each row is a default, not a rule. Choose the idiom only when inputs, outputs and errors stay the same.
 - A React idiom that changes a visible behavior is a `deviation`, with the source citation and the reason.

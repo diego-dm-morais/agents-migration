@@ -6,6 +6,15 @@ wording the prompts use, so a missing phrase means the prompt does not state the
 import glob, os, sys
 
 root = sys.argv[1]
+
+
+def agent_text(name):
+    """The prompt of an agent plus the rules it reads first (skills/migrate/references/agent-rules/<name>.md)."""
+    parts = [os.path.join(root, "agents", name + ".md"),
+             os.path.join(root, "skills", "migrate", "references", "agent-rules", name + ".md")]
+    return "".join(open(p, encoding="utf-8").read() for p in parts if os.path.exists(p))
+
+
 AG = ["behavior-extractor", "spec-writer", "migration-planner", "task-decomposer",
       "implementer", "parity-reviewer", "doc-writer"]
 # Agents that may end with NEEDS: user (routing.md, "Allowed NEEDS owners by worker").
@@ -38,8 +47,7 @@ for rule, per in MATRIX.items():
         need = per.get(a)
         if need is None:
             cells.append("-"); continue
-        path = os.path.join(root, "agents", a + ".md")
-        text = open(path, encoding="utf-8").read().lower() if os.path.exists(path) else ""
+        text = agent_text(a).lower()
         if any(n.lower() in text for n in need):
             cells.append("ok")
         else:
@@ -64,9 +72,7 @@ for s in LANG:
     if "## Library registry" not in text or not any(r in text for r in REGISTRY):
         gaps.append(f"library research skill {s}: needs '## Library registry' with its registry URL")
 for a in ["migration-planner"]:
-    path = os.path.join(root, "agents", a + ".md")
-    text = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
-    if "library-research" not in text:
+    if "library-research" not in agent_text(a):
         gaps.append(f"library research agent {a}: must point to references/library-research.md")
 # The implementer gets the rule from migration-conduct, which it preloads (section 10).
 conduct = os.path.join(root, "skills", "migration-conduct", "SKILL.md")

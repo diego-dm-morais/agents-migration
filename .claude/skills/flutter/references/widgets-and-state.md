@@ -53,7 +53,7 @@ Future<void> save() async {
 
 ## Rebuild scope
 
-- The Flutter state docs describe a `ChangeNotifier` model: "Call this method any time the model changes in a way that might change your app's UI" (https://docs.flutter.dev/data-and-backend/state-mgmt/simple). The package and import used there are not read in this run: verify before use.
+- The Flutter state docs describe a `ChangeNotifier` model: "Call this method any time the model changes in a way that might change your app's UI" (https://docs.flutter.dev/data-and-backend/state-mgmt/simple). `ChangeNotifier` is part of `flutter:foundation` (https://docs.flutter.dev/data-and-backend/state-mgmt/simple).
 - The same page says that `notifyListeners()` calls the builder of every matching `Consumer`, and that a `Consumer` should sit "as deep in the tree as possible".
 
 ## Widget tests

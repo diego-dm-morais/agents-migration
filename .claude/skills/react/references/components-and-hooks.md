@@ -36,7 +36,7 @@ Read this when a migrated unit has components, hooks, state, routing, styling, a
 
 ## Styling
 
-- Not verified offline: the styling options the Next.js styling guide lists. Read https://nextjs.org/docs/app/getting-started/css before naming one.
+- Styling options listed by the Next.js CSS guide: Tailwind CSS, CSS Modules, Global CSS, External Stylesheets, Sass, CSS-in-JS (https://nextjs.org/docs/app/getting-started/css).
 - Keep the source's visual rules: colors, spacing, breakpoints, font sizes. Any visible change is a `deviation`.
 - Import global styles from the root layout only (not verified offline: the Next.js rule on where global CSS may be imported).
 

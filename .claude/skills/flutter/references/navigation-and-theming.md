@@ -32,7 +32,7 @@ Read this when a migrated unit has routes, screens that push or pop, deep links,
 ## Theming (ThemeData)
 
 - `ThemeData` holds the visual defaults for Material widgets: colors, text styles, component themes. Each widget reads it through `Theme.of(context)` (https://api.flutter.dev/flutter/material/ThemeData-class.html).
-- `MaterialApp` takes `theme` for light mode and `darkTheme` for dark mode, and `themeMode` to choose between them (https://api.flutter.dev/flutter/material/MaterialApp-class.html). The field names were not re-read in this run: verify before use.
+- `MaterialApp` takes `theme` for light mode and `darkTheme` for dark mode, and `themeMode` to choose between them (https://api.flutter.dev/flutter/material/MaterialApp-class.html).
 - `ColorScheme` holds the color roles (primary, surface and others). Build it from a seed with `ColorScheme.fromSeed` or set each role explicitly (https://api.flutter.dev/flutter/material/ColorScheme-class.html).
 - Parity risk: a source color given as a hex value must map to the same `Color` value. `Color(0xFFRRGGBB)` takes an ARGB int; check the alpha byte against the source.
 - Parity risk: text sizes are in logical pixels. Fonts and `TextStyle` values must match the source's size and weight, not the platform default.

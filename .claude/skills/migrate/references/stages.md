@@ -39,3 +39,4 @@ READY means extract, spec, plan and tasks are OK. Build, review and doc come aft
 - A stage writes only its own artifact. Code is written only by build.
 - A stage that finds a problem owned by an upstream stage stops with a `NEEDS` line and does not work around it.
 - Freeze: once any task is not `pending`, spec, plan and tasks do not run again. Changes after that point are reported to the user.
+- Border gaps (`deferred-capture <id>` in the extraction Gaps, migration-conduct section 1a) do not block extract, spec, plan or tasks. The task that captures each one runs in build: the implementer records the source output with the command the plan names, in `docs/migration/<unit>/captures.md`, and parity-reviewer compares it. A capture that contradicts the assumed behavior is an addendum there; it does not reopen an earlier stage.

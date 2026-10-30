@@ -8,7 +8,7 @@ metadata:
 
 # angular (Angular v22, TypeScript)
 
-Practice for Angular code, used when Angular is the source or the target of a migration. The baseline is the Angular version the official site shows as current on 2026-10-30 (v22). Facts were checked against angular.dev, rxjs.dev and the pages listed at the end. Where a fact could not be confirmed (for example, the rxjs.dev pages, which returned only their title), the file says `not verified offline` and gives the reason. Nothing here was run: no Angular toolchain was installed where this skill was written, so no gate command was run.
+Practice for Angular code, used when Angular is the source or the target of a migration. The baseline is the Angular version the official site shows as current on 2026-10-30 (v22). Facts were checked against angular.dev, rxjs.dev and the pages listed at the end. Where a fact could not be confirmed, the file says `not verified offline` and gives the reason. RxJS facts cite the RxJS 7.8.2 source on unpkg, because the rxjs.dev pages returned only their title. Nothing here was run: no Angular toolchain was installed where this skill was written, so no gate command was run.
 
 ## 1. Scope and versions
 
@@ -37,8 +37,8 @@ Practice for Angular code, used when Angular is the source or the target of a mi
 
 ## 5. Concurrency and async
 
-- `not verified offline`: observables are lazy (nothing runs until `subscribe`) and teardown runs on `unsubscribe` (https://rxjs.dev/guide/observable). The rxjs.dev pages returned only the title "RxJS" when fetched, so neither statement is confirmed. Check the page directly before citing.
-- `not verified offline`: pick the flattening operator on purpose (`switchMap`, `mergeMap`, `concatMap`, `exhaustMap`). The semantics stated here are not confirmed: the rxjs.dev operator pages (https://rxjs.dev/api/operators/switchMap, https://rxjs.dev/api/operators/concatMap) returned only the title when fetched. Verify on those pages before citing.
+- Observables are lazy: "calling `subscribe` is actually the moment when Observable starts its work, not when it is created" (https://unpkg.com/rxjs@7.8.2/src/internal/Observable.ts, doc comment of `subscribe`). Teardown runs on `unsubscribe`: `Subscription.add()` adds "a finalizer to this subscription, so that finalization will be unsubscribed/called", and `unsubscribe()` runs it through `execFinalizer` (https://unpkg.com/rxjs@7.8.2/src/internal/Subscription.ts).
+- Flattening operators (RxJS 7.8.2 source doc comments): `switchMap` stops emitting from the earlier inner Observable when a new one arrives (https://unpkg.com/rxjs@7.8.2/src/internal/operators/switchMap.ts); `concatMap` runs "in a serialized fashion waiting for each one to complete before merging the next" (https://unpkg.com/rxjs@7.8.2/src/internal/operators/concatMap.ts); `mergeMap` has `concurrent: number = Infinity`, i.e. inner subscriptions run in parallel by default (https://unpkg.com/rxjs@7.8.2/src/internal/operators/mergeMap.ts); `exhaustMap` "ignores every new projected Observable if the previous projected Observable has not yet completed" (https://unpkg.com/rxjs@7.8.2/src/internal/operators/exhaustMap.ts).
 - Change detection without Zone.js: "Angular relies on notifications from core APIs in order to determine when to run change detection and on which views." Angular v21 and later already default to zoneless (https://angular.dev/guide/zoneless).
 
 ## 6. Data and numbers (parity traps)
@@ -50,7 +50,7 @@ Practice for Angular code, used when Angular is the source or the target of a mi
 ## 7. Testing
 
 - Default test runner for new projects: Vitest with jsdom. The testing page says "New projects include `vitest` and `jsdom` by default" (https://angular.dev/guide/testing). "Karma is still supported" (same page). The Jasmine assertion style of the Karma setup is named only in a navigation link on that page ("Testing with Karma and Jasmine").
-- TestBed: `TestBed.configureTestingModule(moduleDef)` returns `TestBed`; `TestBed.createComponent(component)` returns `ComponentFixture<T>` (https://angular.dev/api/core/testing/TestBed). `createComponent` "does not trigger change detection synchronously" (https://angular.dev/guide/testing/components-scenarios). `not verified offline`: `fixture.detectChanges()` is not named on that page, so its use is unconfirmed; check the TestBed and ComponentFixture API pages before citing it.
+- TestBed: `TestBed.configureTestingModule(moduleDef)` returns `TestBed`; `TestBed.createComponent(component)` returns `ComponentFixture<T>` (https://angular.dev/api/core/testing/TestBed). `createComponent` "does not trigger change detection synchronously" (https://angular.dev/guide/testing/components-scenarios). `fixture.detectChanges()` is documented as "Trigger a change detection cycle for the component" (https://angular.dev/api/core/testing/ComponentFixture).
 - Name each test with its rule id when there is one, and keep one behavior per test. Test state transitions, not only the final render.
 - Details: references/testing-and-tooling.md.
 
@@ -104,5 +104,5 @@ Run each command in the project root and report its real output. A gate that did
 - Testing: https://angular.dev/guide/testing, https://angular.dev/guide/testing/components-scenarios, https://angular.dev/api/core/testing/TestBed
 - RxJS interop and pipes: https://angular.dev/api/core/rxjs-interop/toSignal, https://angular.dev/api/core/rxjs-interop/takeUntilDestroyed, https://angular.dev/api/common/AsyncPipe, https://angular.dev/api/common/DecimalPipe, https://angular.dev/api/common/DatePipe, https://angular.dev/api/core/ErrorHandler
 - Zoneless: https://angular.dev/guide/zoneless
-- RxJS (title only when fetched; not confirmed): https://rxjs.dev/guide/overview, https://rxjs.dev/guide/observable, https://rxjs.dev/api/operators/switchMap, https://rxjs.dev/api/operators/concatMap
+- RxJS 7.8.2 source (fetched bodies): https://unpkg.com/rxjs@7.8.2/src/internal/Observable.ts, https://unpkg.com/rxjs@7.8.2/src/internal/Subscription.ts, https://unpkg.com/rxjs@7.8.2/src/internal/operators/switchMap.ts, https://unpkg.com/rxjs@7.8.2/src/internal/operators/concatMap.ts, https://unpkg.com/rxjs@7.8.2/src/internal/operators/mergeMap.ts, https://unpkg.com/rxjs@7.8.2/src/internal/operators/exhaustMap.ts
 - Tooling: https://angular.dev/cli/build, https://angular.dev/cli/test

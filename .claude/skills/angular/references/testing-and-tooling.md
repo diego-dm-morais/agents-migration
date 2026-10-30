@@ -18,11 +18,11 @@ Read this when you write tests, set up the quality gate, or choose an Angular to
 
 - `TestBed.configureTestingModule(moduleDef)` returns `TestBed`; `TestBed.createComponent(component)` returns `ComponentFixture<T>` (https://angular.dev/api/core/testing/TestBed).
 - `createComponent` "does not trigger change detection synchronously" (https://angular.dev/guide/testing/components-scenarios). Use `await fixture.whenStable()` to wait for change detection, or `fixture.componentRef.setInput(...)` for inputs (same page).
-- `not verified offline`: `fixture.detectChanges()`. The components-scenarios page does not name it (it shows `harness.detectChanges()` only), so this call is unconfirmed. The ComponentFixture API page was not fetched in this run; check it on angular.dev before use.
+- `fixture.detectChanges()` is documented as "Trigger a change detection cycle for the component" (https://angular.dev/api/core/testing/ComponentFixture).
 - Provide fakes for services through `providers`. Prefer a hand-written fake first.
 
 ```ts
-// BR-UI-001 shows the initial count (sketch; the TestBed API is confirmed, detectChanges is not, see above)
+// BR-UI-001 shows the initial count (sketch; TestBed and fixture.detectChanges are confirmed, see above)
 it('BR-UI-001 shows the initial count', () => {
   const fixture = TestBed.createComponent(CounterComponent);
   fixture.detectChanges();

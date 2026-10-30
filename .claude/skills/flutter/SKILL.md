@@ -12,7 +12,7 @@ Practice for Dart and Flutter code, used when Dart or Flutter is the source or t
 
 ## 1. Scope and versions
 
-- Flutter 3.47 is the newest stable release on https://docs.flutter.dev/release/whats-new (dated 12 August 2026). The release archive page did not load in this run, so a newer stable may exist: verify before use.
+- Flutter 3.47 is the newest stable release on https://docs.flutter.dev/release/whats-new (dated 12 August 2026). The page lists "12 August 2026: Release 3.47" and a site banner names patch 3.47.8, which the page does not call the latest stable.
 - The Dart SDK bundled with Flutter 3.47 is not stated on the pages read: verify before use with `dart --version` in that SDK. The Dart docs state that they reflect Dart 3.13.3 (https://dart.dev/get-dart).
 - Flutter and Dart have separate version numbers. Record both in the report: the Flutter SDK version and the Dart SDK version that the project actually runs.
 - Dart 3.0 (released 10 May 2023) dropped language versions before 2.12 (https://dart.dev/resources/language/evolution). Every unit is null-safe.

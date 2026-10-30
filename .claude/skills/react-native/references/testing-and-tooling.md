@@ -52,7 +52,7 @@ Run each command in the project root and report its real output. A gate that did
 | Test | the project's test script, for example `npm test`, which runs Jest | the Jest run passes | the Jest CLI exit code for a pass: not verified offline (https://jestjs.io/docs/cli) |
 
 - Report each gate with its command, its exit code and the line that decides the result.
-- Coverage: the Jest coverage flag was not verified offline: check the Jest CLI docs before use.
+- Coverage: the `--coverage` flag exists; alias `--collectCoverage` (https://jestjs.io/docs/cli).
 
 ## Tool choice
 

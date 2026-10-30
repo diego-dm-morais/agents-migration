@@ -18,7 +18,7 @@ You do not write migration code, specs, plans, reviews or docs yourself. You run
 
 - empty, or `status`: report the state of every unit.
 - `help`: print `${CLAUDE_SKILL_DIR}/references/help.md` verbatim to the user and stop. Run no other step.
-- `init`: set up the project (`${CLAUDE_SKILL_DIR}/references/intake.md`).
+- `init`: set up the project (`${CLAUDE_SKILL_DIR}/references/intake.md`), then run `check.sh preflight` and record its result in MIGRATION.md.
 - `ask` or `ask <unit>`: answer pending decisions (`${CLAUDE_SKILL_DIR}/references/ask.md`).
 - `architecture`: dispatch migration-planner in mode `architecture` to write or refresh `docs/migration/ARCHITECTURE.md`. Run it after the backlog exists and before the first unit plan when the target is a new architecture. Its `ID-A` choices go through the ask flow like any `ID-`.
 - `<unit>`: run the unit through the stages until it is READY, or until a stop.
@@ -44,7 +44,7 @@ Run it before every decision and after every worker returns. Its output is the o
    - for `<unit> <stage>`: that stage. Every upstream stage must be OK first; if one is not, report it and stop.
 2a. Dependencies: before the build of a unit, every unit in its Backlog `depends:` must have review OK. If one does not, report it and stop. Before the plan of a unit, when ARCHITECTURE.md has `target_architecture: new`, its state must be OK (frontmatter `status: ok`, `upstream_migration` equal to `check.sh hash` of MIGRATION.md); otherwise run `architecture` first.
 3. Freeze check: if any task in `tasks.md` has a status other than `pending`, the build has started. Do not dispatch spec-writer, migration-planner or task-decomposer. Report and stop.
-4. Look up the owner of the state in `routing.md`. Dispatch it with the Agent tool, `subagent_type` set to the owner's name. The prompt gives: the unit id, the stage, the artifact path, the path of `docs/migration/MIGRATION.md`, the state line that caused the dispatch, and this line: "Your final message follows the migration-conduct contract."
+4. Look up the owner of the state in `routing.md`. Dispatch it with the Agent tool, `subagent_type` set to the owner's name. The prompt gives: the unit id, the stage, the artifact path, the path of `docs/migration/MIGRATION.md`, the state line that caused the dispatch, and this line: "Your final message follows the migration-conduct contract." On a re-dispatch, the prompt also names the ids that changed since the last run. The worker reads only those blocks with `sh .claude/skills/migrate/scripts/check.sh show <unit> <stage> <id>...` and changes them with Edit; it rewrites the whole file only on its first draft.
 5. Dispatch one worker and wait for its result before any other step. The result arrives as a notification. Do not check the artifacts or dispatch again before it.
 6. When it returns, run `status <unit>` again. Read the `NEEDS:` line of its final message:
    - `none`: continue with step 2.
@@ -79,6 +79,7 @@ Print one line per stage in the chat: the stage, the state before, the state aft
 - Legacy decisions (`DEC-`) become ADR files in the plan stage (`docs/migration/adr/`). The plan is INVALID until `check.sh adr <unit>` is OK (`references/stages.md`).
 - A unit is never reported done while its doc is STALE.
 - Background runs: for a scripted run, set `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` so that each worker finishes before the next step starts.
+- Final message gate: the `SubagentStop` hook in `.claude/settings.local.json` runs `check.sh contract`. A migration agent whose final message misses a key or runs past 12 lines is blocked once, with the reason, and it rewrites the message. A stop that follows a block is allowed. The hook is skipped for any other agent type. Project hooks run only in a trusted workspace.
 - The report to the user is in the reply language of the project CLAUDE.md (pt-BR in the migration project). It names the unit, the stages run, the final states, the open items and each `NEEDS` line.
 - Every `status` run prints the deadline (`deadline` in MIGRATION.md). An `OVERDUE` deadline goes into the report as a warning. A deadline sets priority and scope, never fidelity (`references/routing.md`, Deadline).
 - Commits, pushes and pull requests are outside this skill. Make them only when the user asks in those words, and never on `main` or `master`.

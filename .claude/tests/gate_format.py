@@ -22,6 +22,8 @@ fails = 0
 AGENT_MAX_LINES = 100
 AGENT_MAX_BYTES = 7 * 1024
 TOTAL_AGENT_BYTES = 43 * 1024
+# The one model the seven agents pin (decision of 2026-10-30, docs/convencoes.md). Any other value fails.
+PINNED_MODEL = "claude-haiku-5-5"
 total_agent_bytes = 0
 
 
@@ -119,8 +121,8 @@ for ag in sorted(glob.glob(os.path.join(root, "agents", "*.md"))):
         fail(ag, f"color '{data['color']}' is not allowed")
     if "effort" in data and data["effort"] not in EFFORTS:
         fail(ag, f"effort '{data['effort']}' is not allowed")
-    if "model" in data:
-        fail(ag, "model is pinned (must be omitted so the session model applies)")
+    if "model" in data and data["model"] != PINNED_MODEL:
+        fail(ag, f"model '{data['model']}' is not allowed (only '{PINNED_MODEL}' is pinned, by decision of 2026-10-30)")
     for ref in data.get("skills", []) or []:
         if ref not in skill_names:
             fail(ag, f"skills: '{ref}' has no skill directory")

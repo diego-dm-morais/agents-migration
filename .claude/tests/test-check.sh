@@ -54,6 +54,7 @@ EOF
 unit: round-price
 stage: extract
 status: ok
+source_sha: $SHA_USED
 ---
 # round-price
 
@@ -61,10 +62,10 @@ status: ok
 - \`src/pricing.py:3 @$S7\` round_price
 
 ### BR-ROUND-001 Negative amounts are rejected
-- Statement: negative amounts raise ValueError. Evidence: \`src/pricing.py:4-5 @$S7\`.
+- Statement: negative amounts raise ValueError. Evidence: \`src/pricing.py:4-5 @$S7\` "raise ValueError".
 
 ### BR-ROUND-002 Half-even rounding to cents
-- Statement: quantize to 0.01 with ROUND_HALF_EVEN. Evidence: \`src/pricing.py:$L6 @$S7\`.
+- Statement: quantize to 0.01 with ROUND_HALF_EVEN. Evidence: \`src/pricing.py:$L6 @$S7\` "ROUND_HALF_EVEN".
 
 ## Legacy decisions contrary to best practice
 - none found: searched src/pricing.py for overrides
@@ -159,6 +160,8 @@ unit: round-price
 stage: review
 status: ok
 round: 1
+evidence_level: L1
+verify: pass
 scope_hash: $SC
 ---
 # Review

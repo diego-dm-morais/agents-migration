@@ -23,7 +23,7 @@ Read this when you map a source construct to Kotlin or Android Compose code. The
 | Navigation | Navigation Compose: `NavHost`, `composable`, `NavController` | route identity and back-stack behavior the source defines |
 | Error model | one class per source exception; the source message kept | `!!` throwing `NullPointerException` where the source does not |
 | Activity-level state | ViewModel and `rememberSaveable`; not a field on the Activity | the Activity is recreated on rotation (https://developer.android.com/guide/components/activities/state-changes) |
-| Background work | a coroutine in the ViewModel (`viewModelScope`; API not verified offline) | the work continues across rotation (https://developer.android.com/topic/libraries/architecture/viewmodel); a source that cancels it differs |
+| Background work | a coroutine in the ViewModel (`viewModelScope`, https://developer.android.com/topic/libraries/architecture/viewmodel) | the work continues across rotation (https://developer.android.com/topic/libraries/architecture/viewmodel); a source that cancels it differs |
 | Locale formatting | the platform formatter or a library the plan names | the locale of the output; the device locale |
 
 ## Compose notes

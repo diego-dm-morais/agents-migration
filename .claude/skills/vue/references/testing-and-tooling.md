@@ -4,7 +4,7 @@ Read this when you write tests, set up the quality gate, or choose a Vue tool. F
 
 ## Test layout
 
-- One test file per unit: `<unit>.spec.ts` or `<unit>.test.ts`, next to the code or in `test/`. Name each test with its rule id when there is one, for example `BR-CART-002 sums line totals`. The Vitest default include pattern was not verified offline: read `vitest.config` before use.
+- One test file per unit: `<unit>.spec.ts` or `<unit>.test.ts`, next to the code or in `test/`. Name each test with its rule id when there is one, for example `BR-CART-002 sums line totals`. The Vitest default include pattern is `['**/*.{test,spec}.?(c|m)[jt]s?(x)']` (https://vitest.dev/config/include).
 - Component tests: Vue Test Utils (VTU). Store tests: Pinia with `@pinia/testing` (https://pinia.vuejs.org/cookbook/testing.html). Pure composable tests: plain Vitest, no DOM.
 
 ## Commands
@@ -12,15 +12,15 @@ Read this when you write tests, set up the quality gate, or choose a Vue tool. F
 | Command | What it does | What passes |
 |---|---|---|
 | `npx vitest run` | runs the tests once, without watching (https://vitest.dev/guide/) | every test passes; read the process exit code |
-| `npx vitest run path/to/file.spec.ts` | runs one file (Vitest CLI filter; not verified offline) | as above |
-| `npx vitest run -t "name"` | runs tests whose name matches (not verified offline) | as above |
+| `npx vitest run path/to/file.spec.ts` | runs one file (filter argument, https://vitest.dev/guide/cli) | as above |
+| `npx vitest run -t "name"` | runs tests whose full names match a regexp (https://vitest.dev/guide/cli) | as above |
 | `npx vitest --environment=jsdom` | sets the environment for the run (https://vitest.dev/config/environment) | as above |
 
 ## Environment
 
 - The default environment is Node (https://vitest.dev/config/environment). A component test needs `jsdom` or `happy-dom`.
 - Per file: a `@vitest-environment jsdom` comment at the top of the file (same page).
-- The config file key for the environment was not verified offline: read the Vitest config page before writing it.
+- The config file key for the environment is `environment` (https://vitest.dev/config/environment).
 - Vitest reads `vite.config.*` by default (https://vitest.dev/guide/). Vitest requires Vite 6.4.0 or later and Node 22.12.0 or later (same page).
 
 ## Unit test with Vitest
@@ -75,7 +75,7 @@ const wrapper = mount(Cart, {
 ## Doubles and fakes
 
 - Put each external dependency behind a function or module that the unit receives as a parameter. Write a hand-made fake for it. This is the default.
-- Mocking the router: VTU and Vitest both support stubs; the exact router-mock API was not verified offline. Use a real router with `createRouter` and `createMemoryHistory` from `vue-router` when the route matters (verify the API page before use).
+- Mocking the router: VTU documents `global.mocks` for `$route` and `$router` (https://test-utils.vuejs.org/guide/advanced/vue-router.html, which lists the stubs, not the router API). The exact router-mock API was not verified in the official pages read. Use a real router with `createRouter` and `createMemoryHistory` from `vue-router` when the route matters: `createRouter` "Creates a Router instance that can be used by a Vue app" and `createMemoryHistory` "Creates an in-memory based history" (https://router.vuejs.org/api/).
 - Time: pass a clock as a value. Use fake timers only where the source uses timers (Vitest timer API not verified offline).
 
 ## Gate commands
@@ -88,7 +88,7 @@ const wrapper = mount(Cart, {
 | Lint and format | project's ESLint, Prettier or Biome | no error | not verified offline |
 
 - Report each gate with its command, its exit code and the line that decides the result.
-- Coverage: the Vitest `--coverage` flag and its provider were not verified offline: verify before use.
+- Coverage: the `--coverage` CLI option overrides `coverage.enabled` (default `false`) (https://vitest.dev/guide/cli). The default coverage provider is `v8`; `istanbul` is the other built-in option (https://vitest.dev/guide/coverage).
 
 ## Tool choice
 

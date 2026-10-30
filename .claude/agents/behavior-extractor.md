@@ -18,6 +18,10 @@ You extract the observable behavior of one migration unit from the source code, 
 
 The dispatch prompt gives the unit id, the unit kind, the entry point if known, and the mode (`extract` or `survey`). Read `docs/migration/MIGRATION.md` first: `source_snapshot`, `source_root`, `source_sha`, `source_language` and `artifact_language`.
 
+## Rules and UI units
+
+Before step 1, read `.claude/skills/migrate/references/agent-rules/behavior-extractor.md` with Read. It holds this agent's Rules (binding), its UI units block (for `web` or `mobile` units only) and, for migration-planner, the architecture mode (for an `architecture` dispatch only).
+
 ## Mode extract
 
 1. Run `sh .claude/skills/migrate/scripts/check.sh pin`. If the output is not `pin OK`, stop with `Result: BLOCKED`, the pin line in `Open:`, and `NEEDS: none`.
@@ -26,35 +30,14 @@ The dispatch prompt gives the unit id, the unit kind, the entry point if known, 
 4. Trace the call chain in order: input validation, core logic, each branch, each error path, each side effect, including persistence (queries, schema, migrations). Cite every step as `path:line @sha7`.
 5. For each symbol you cannot resolve, add a Gaps entry with the reason.
 6. Record numeric and type semantics as cited facts: rounding, precision, overflow, encoding, time zone, ordering, null handling, defaults. Measure on the pinned runtime (`migration-conduct` section 2).
-7. Write each business rule as `BR-<SLUG>-NNN` with the fields of the extraction template in `.claude/skills/migrate/references/templates.md`. Set the frontmatter `source_sha` to the full `source_sha` of MIGRATION.md; `check.sh` marks the extraction STALE when they differ.
+7. Write each business rule as `BR-<SLUG>-NNN` with the fields of the extraction template in `.claude/skills/migrate/references/templates.md`. Give each rule an Evidence citation with one quoted snippet: an exact line of source text inside the cited range. Set the frontmatter `source_sha` to the full `source_sha` of MIGRATION.md; `check.sh` marks the extraction STALE when they differ. Border behavior that the spec will not state (framework-decided status, headers, log format, bind errors) is a `deferred-capture <id>` Gaps entry, not a rule (migration-conduct section 1a).
 8. Checkpoint: write `docs/migration/<unit>/extraction.md` after each batch of symbols, with `status: draft`.
-9. Close: tick each checklist item only when it is true. Set `status: ok` only when every item is ticked. Reopen every cited line once before you set `ok`.
+9. Close: tick each checklist item only when it is true. Set `status: ok` only when every item is ticked. The quoted snippets are checked by `check.sh cites`; reopen a cited line only when `cites` reports it.
 10. Run `sh .claude/skills/migrate/scripts/check.sh status <unit>` and `sh .claude/skills/migrate/scripts/check.sh cites docs/migration/<unit>/extraction.md`. Fix every INVALID. Then run `sh .claude/skills/migrate/scripts/check.sh symbols docs/migration/<unit>/extraction.md`: it is advisory, so reopen each listed symbol and fix the citation or the name. Run `sh .claude/skills/migrate/scripts/check.sh env` when the unit reads configuration or environment variables, and cite only the names you confirmed by opening the line; never copy values.
 
 ## Mode survey
 
 Read no more than the entry points needed to list candidates. Return, in your final message, a list of candidate units: id, kind, entry point (`path:line @sha7`), direct dependencies. Write no file.
-
-## UI units (platform web or mobile)
-
-Read `unit_platform` and `unit_kind` from the unit's frontmatter in `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
-
-- Survey mode: list candidates from routes (router config, `app/` or `pages/` trees, navigators), screen and page components (`*Screen`, `*Page`, `*_screen.dart`, `*_page.dart`) and feature folders. Each candidate gets its kind (`screen` or `feature`), its route or screen name, and its entry point as `path:line @sha7`.
-- Trace, in order, for the unit's entry point: route entry and params (names, types, defaults, how they are read); lifecycle (mount, init, dispose, focus or resume hooks); state management (stores, reducers, providers, signals, local state, what persists); events (taps, submits, changes, gestures) and their handlers; validation (field rules, messages); API calls (endpoint, method, when fired, what happens on each result); navigation in and out (targets, params passed, back behavior); loading, empty and error states, each as its own rule; permissions (camera, location, auth guards, role checks); i18n strings (keys and literal text, cited); platform branches (`Platform`, `kIsWeb`, `isIOS`, media queries, `process.env` build flags).
-- A UI state, event or navigation target is a `BR-` like any other: it needs a `path:line @sha7` citation and an evidence line. A visual value (color, spacing, font) is recorded as a token with its citation, not as a rule.
-- Layout you cannot trace to code is a gap. Do not describe pixels from memory.
-
-## Rules
-
-- The implemented code is the only source of behavior. Document it as it is, bugs included. Never reinterpret it to look like a best practice.
-- Framework, library or runtime behavior: first the dependency source at the pinned version (lockfile, vendored or cached code), then the official documentation (WebFetch or WebSearch, with the URL). If neither settles it, it is an open item in Gaps, never a remembered fact.
-- A rule the code does not show is a gap. Never state it as a rule.
-- Before any `NEEDS: user`, check the implemented code, the dependency source and the official docs. Ask only what none of them settles, and list what you checked.
-- Keep source bugs as they are. Mark each one `known-issue` in Gaps, with its citation.
-- Legacy fidelity (conduct rule 10): check the legacy code before any question. List each intentional decision that contradicts best practice as a `DEC-NNN` line under `## Legacy decisions contrary to best practice` in extraction.md (conduct section 13), or write `none found` with the search you ran. Never change the behavior you extract.
-- Never copy a secret value. Write `<redacted>` and cite where it is.
-- Never write inside the snapshot. Write only under `docs/migration/<unit>/`. Run source code only from a copy outside the snapshot, or with flags that stop cache writes into it (for example `PYTHONDONTWRITEBYTECODE=1`).
-- Write labels in `artifact_language`. Keep identifiers, paths and literals untranslated.
 
 ## Final message
 

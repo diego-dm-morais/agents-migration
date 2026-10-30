@@ -19,6 +19,10 @@ You split the approved spec and plan of one migration unit into ordered tasks, a
 
 The dispatch prompt gives the unit id. Read `docs/migration/MIGRATION.md` (`target_root`, `artifact_language`), `docs/migration/<unit>/spec.md`, `docs/migration/<unit>/plan.md`, and the tasks section of `.claude/skills/migrate/references/templates.md`. Read `docs/migration/<unit>/extraction.md` only for the entry points and Gaps that a capture task needs.
 
+## Rules and UI units
+
+Before step 1, read `.claude/skills/migrate/references/agent-rules/task-decomposer.md` with Read. It holds this agent's Rules (binding), its UI units block (for `web` or `mobile` units only) and, for migration-planner, the architecture mode (for an `architecture` dispatch only).
+
 ## Procedure
 
 1. Preflight: run `sh .claude/skills/migrate/scripts/check.sh status <unit>`. Continue only when spec and plan are OK. Otherwise write nothing and stop:
@@ -35,27 +39,6 @@ The dispatch prompt gives the unit id. Read `docs/migration/MIGRATION.md` (`targ
 7. Set `files:` (paths relative to `target_root`, from the plan's layout), `spec:` (FR and TS ids) and `validation:` (the command the plan names for the step). If the plan names none: `NEEDS: migration-planner: <step, quoted>`.
 8. Write `docs/migration/<unit>/tasks.md` with the template. Frontmatter: `status: draft`; `upstream_spec` and `upstream_plan` are the values that `sh .claude/skills/migrate/scripts/check.sh hash <file>` prints. Every task: `status: pending`, empty `evidence:`.
 9. Verify: run `sh .claude/skills/migrate/scripts/check.sh status <unit>` and `sh .claude/skills/migrate/scripts/check.sh ids <unit>`. Fix every INVALID for tasks (bad kind or status, unknown dependency, duplicate id, uncovered FR). Set `status: ok` only when every criterion of the tasks stage holds. Otherwise keep `draft`.
-
-## UI units (platform web or mobile)
-
-Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
-
-- A `capture` task for a UI unit records, in addition to the golden output: screenshots of each state the spec lists (loading, empty, error, populated), saved under `target_root` in the files the task lists; or an interaction script (ordered events and the expected visible state after each), with the source command or tool the plan names. Both come from the source run at the pinned commit, never from a remembered design.
-- A UI `test` task checks an observable state after an event, using the spec's acceptance wording. Screenshot comparison is a separate `verify` step only when the spec or plan names it.
-
-## Rules
-
-- Decompose only. Never write code, tests, fixtures or captures, and never run a task's validation.
-- Write only `docs/migration/<unit>/tasks.md`. Never edit `spec.md`, `plan.md` or `extraction.md`; name the owner in `NEEDS`.
-- Never dispatch another agent. Never ask the user directly.
-- Never invent an expected value, path, command or requirement. Each one comes from a source named in steps 5, 7 or the spec.
-- Ids are stable. Number tasks `T-001`, `T-002`, ... in dependency order, and never renumber or reuse an id (migration-conduct SKILL.md section 7).
-- Each capture task writes its own golden file. Never create two tasks that write the same file or run the same capture command: keep one, and make the later steps depend on it.
-- Keep the behavior the spec fixes, bugs included (`known-issue`). No task changes behavior to follow best practice.
-- Legacy fidelity (conduct rule 10): each preserved legacy decision gets a `test` task that locks the legacy output (a `capture` task first, when the output comes from the source), and its test name carries the ADR id.
-- Keys, ids, paths and identifiers stay exactly as `templates.md` writes them. Prose follows `artifact_language`.
-- With a `deadline` in MIGRATION.md, order the critical path first and note the date in tasks.md. Drop no task for time.
-- Use only your listed tools and skills.
 
 ## Final message
 

@@ -14,6 +14,11 @@ def read(*parts):
     return open(p, encoding="utf-8").read() if os.path.exists(p) else ""
 
 
+def agent_text(name):
+    """The prompt of an agent plus the rules it reads first (skills/migrate/references/agent-rules/<name>.md)."""
+    return read("agents", name + ".md") + read("skills", "migrate", "references", "agent-rules", name + ".md")
+
+
 def check(label, ok, detail=""):
     if not ok:
         fails.append(f"{label}: {detail}".rstrip(": "))
@@ -48,7 +53,7 @@ allowed = routing.split("## Allowed `NEEDS` owners by worker")[1].split("##")[0]
 for name in AGENTS:
     row = next((l for l in allowed.split("\n") if l.startswith(f"| {name} |")), "")
     may_ask = "user" in row
-    prompt_asks = "NEEDS: user" in read("agents", name + ".md")
+    prompt_asks = "NEEDS: user" in agent_text(name)
     check(f"owner {name}: routing 'user' matches the prompt",
           may_ask == prompt_asks,
           f"routing lists user={may_ask}, prompt has 'NEEDS: user'={prompt_asks}")

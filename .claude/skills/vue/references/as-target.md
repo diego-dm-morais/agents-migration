@@ -29,5 +29,5 @@ Read this when you map a source construct to Vue code. The left column is the co
 ## Notes on idioms
 
 - Choose an idiom only when the inputs, outputs and errors stay the same. Otherwise keep the source behavior and record `deviation`.
-- A source that updates state in an event handler and then reads the DOM must be tested for the DOM value after the update. The DOM update timing was not verified offline: verify the `nextTick` page before relying on it.
+- A source that updates state in an event handler and then reads the DOM must be tested for the DOM value after the update. Vue buffers DOM updates until the next tick, and `nextTick()` waits for that flush (https://vuejs.org/api/general.html#nexttick).
 - For a form, keep the source's validation order and messages. Vue does not supply a validation library; a package is added only when the plan names it.

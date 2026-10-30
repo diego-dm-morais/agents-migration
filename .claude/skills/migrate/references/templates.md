@@ -110,7 +110,7 @@ source_sha: <source_sha of MIGRATION.md at extraction time>
 - Trigger or condition:
 - Effect:
 - Error or status:
-- Evidence: `<path>:<line> @<sha7>`
+- Evidence: `<path>:<line> @<sha7>` "<exact snippet of one source line inside that range>"
 
 ## Numeric and type semantics
 - <fact> — `<path>:<line> @<sha7>`
@@ -128,14 +128,15 @@ source_sha: <source_sha of MIGRATION.md at extraction time>
 
 ## Gaps
 - <symbol or question>: <reason>
+- deferred-capture DC-NNN: <behavior the golden capture settles at build> — `<path>:<line> @<sha7>` (a border behavior, see migration-conduct section 1a)
 
 ## Closure checklist
 - [ ] every entry point traced
 - [ ] every unresolved symbol resolved or listed under Gaps
 - [ ] `check.sh symbols` reviewed: every listed symbol fixed or explained
-- [ ] every response path mapped (success, each error, each exception) — backend; for `web` or `mobile`, every UI state mapped instead (loading, empty, each error, success) with its route or screen transition
-- [ ] every cited line reopened in this run
-- [ ] every rule has evidence
+- [ ] every response path mapped (success, each error, each exception) — backend; for `web` or `mobile`, every UI state mapped instead (loading, empty, each error, success) with its route or screen transition. For an HTTP operation, the trace covers input binding and validation, each error response, persistence, and the border items (start-up, log, configuration) as `deferred-capture` entries
+- [ ] `check.sh cites` passes, quotes included (every rule's snippet is inside its cited range)
+- [ ] every rule has evidence and a quoted snippet
 - [ ] every legacy decision listed under `## Legacy decisions contrary to best practice`, with its evidence, or `none found` with the search that was run
 ```
 
@@ -216,12 +217,18 @@ upstream_spec: <check.sh hash of spec.md>
 - Rollback: <how it returns to the legacy>
 
 ## Parity harness
-- Golden capture: <command that records source output on the pinned runtime>
+- Golden capture: <command that records source output on the pinned runtime, outside the snapshot>
 - Differential (L3): <command that runs source and target on the same inputs and compares>, or `NOT AVAILABLE: <reason>`
+- Golden comparison (L2): <command that compares the target output with the golden files>
+
+## Border captures (deferred-capture)
+- deferred-capture DC-NNN: <border behavior> — capture command: <command on the pinned runtime>; record: `docs/migration/<unit>/captures.md`, section <id>
 
 ## Validation
 - <step>: <validation command from the target gate>
-- coverage: <n>% line coverage, from ID-NNN, or `90% (toolkit default)`
+- coverage: <command and threshold, from ID-NNN, or `90% (toolkit default)`>
+
+First pass rule: the layout, the golden paths, the capture and comparison commands, the coverage command and every library version are written in this stage. All library choices go to the user in one NEEDS batch. A command that cannot run on this machine is written `NOT RUN: <reason>`, never left out.
 
 ## Trace
 - FR-001 -> <construct rows, TS- ids or ID- ids>
@@ -251,6 +258,8 @@ evidence:
 ```
 
 Task status: `pending`, `in_progress`, `done` or `blocked`. Kinds: `capture` records golden output from the source; `setup` prepares the target; `test` writes a failing test; `impl` makes tests pass; `verify` runs the whole gate. `evidence:` is empty until the task is done; then it holds the command and its decisive result.
+
+Granularity: one `test` task per cluster of FR ids, with a table of cases inside it; one `capture` task per corpus of inputs, never one per case. A border capture (plan section Border captures) is one `capture` task whose `spec:` names its deferred id (`DC-NNN`); it runs in build, not before. A task whose validation is `NOT RUN: <reason>` because of a waiver is valid; it is never marked `done`.
 
 ## <unit>/review.md
 

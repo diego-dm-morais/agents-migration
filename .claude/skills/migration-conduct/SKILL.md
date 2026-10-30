@@ -31,11 +31,18 @@ For the same input, the target must behave like the source:
 - errors: kind, code, message, and when each one occurs, including exceptions;
 - side effects that are observable: writes, outgoing calls, events, logs, metrics.
 
-A gap that can change any of these blocks the unit. Never defer it as a detail.
+A gap that can change any of these blocks the unit when it is core behavior (section 1a). A border gap is deferred to a golden capture: it blocks no earlier stage, but parity for it is not claimed until the capture passes. Never defer a gap without that capture.
 
 Port the behavior, not the source's structure: the target layout follows the target conventions. An idiomatic choice still follows rule 3.
 
 Claim parity only with evidence from the current run (section 3). Otherwise say `parity not proven` and name the open gap.
+
+### 1a. Core and border (decided 2026-10-30)
+
+- Core: the happy path; every error class the source returns; persistence effects; numeric and serialization rules of the happy path; anything the spec states as a contract line. A core gap blocks the unit.
+- Border: behavior the framework or runtime decides and the spec does not state as a contract line: status and headers of unmatched routes, server error text, invalid-byte handling, log format, bind-failure text, number literal forms the spec leaves out. A border gap is written in Gaps as `deferred-capture <id>` with its citation. The build records the source output for it (L2, section 3) and the task compares it.
+- A deferred capture that cannot run on this machine stays `NOT RUN`: parity for it is `not proven`, with the reason.
+- A capture that contradicts the assumed behavior is an addendum in the capture record, not a reopen of extraction, spec or plan. A capture that changes a core rule is a core gap and blocks again.
 
 ## 2. Evidence
 
@@ -44,6 +51,7 @@ Claim parity only with evidence from the current run (section 3). Otherwise say 
 - The snapshot must match the pin. Run `check.sh pin`. If it does not match, every claim that depends on the source is `blocked` until it matches.
 - Do not write the behavior of a framework, library, runtime or language standard from memory. Look first in the dependency source at the pinned version, then in its official documentation. Cite the file and line or the URL, or record the fact as an open item.
 - A claim without a citation is a gap, not a fact.
+- Every rule citation (`BR-`) carries one quoted snippet: an exact source line text, inside the cited range, after the citation: `` `path:line @sha7` "snippet" ``. `check.sh cites` confirms the snippet and `check.sh status` rejects a rule without one. A quote replaces the old "reopen every line" checklist item.
 - Measure source behavior (a probe, a golden capture, a differential run) on the runtime and version the source pins: lockfile, container image, toolchain or version file. The runtime installed on the machine is not evidence. Record the runtime and version used next to the measurement. If the pinned runtime is not available, the measurement is `NOT RUN` and the claim stays an open item.
 - Names, paths and literals agree across spec, plan and extraction; a mismatch is a finding.
 
@@ -114,7 +122,7 @@ Applies to every agent that runs `git commit`, `git push` or opens a pull reques
 
 ## 7. Stable ids
 
-`BR-<SLUG>-NNN` rule · `FR-NNN` functional requirement · `TS-NNN` target requirement · `PEND-NNN` pending decision · `ID-NNN` planning decision · `ID-ANNN` architecture decision · `NFR-NNN` non-functional requirement · `T-NNN` task · `RV-NNN` review finding · `DEC-NNN` legacy decision candidate · `ADR-NNN` architecture decision record. Never renumber an id and never reuse one. Withdraw an id by marking it `withdrawn`; do not delete it.
+`BR-<SLUG>-NNN` rule · `DC-NNN` deferred border capture (section 1a) · `FR-NNN` functional requirement · `TS-NNN` target requirement · `PEND-NNN` pending decision · `ID-NNN` planning decision · `ID-ANNN` architecture decision · `NFR-NNN` non-functional requirement · `T-NNN` task · `RV-NNN` review finding · `DEC-NNN` legacy decision candidate · `ADR-NNN` architecture decision record. Never renumber an id and never reuse one. Withdraw an id by marking it `withdrawn`; do not delete it.
 
 ## 8. Verification
 
@@ -144,6 +152,8 @@ Load only the skills of this toolkit: the preloaded ones, the language skills ab
 
 - Stop and report, without guessing, when the snapshot does not match the pin, a required artifact is missing, a dispatch limit is reached, or a `NEEDS` owner is not in the routing table of the orchestrator.
 - A `blocked` item never stops the items that do not depend on it.
+- Workers run in the foreground. Do not start a worker with `run_in_background`; the orchestrator waits for each result before it reads any artifact or dispatches again.
+- A `NEEDS` that asks for a fact the code can settle is returned to the worker that owns the code (behavior-extractor), not to the user (section 4).
 
 ## 12. Final message contract
 

@@ -8,7 +8,7 @@ Read this when a migrated unit has routes, guards, resolvers, reactive forms or 
 - `Routes` is the array type for the route config. Each route has a `path` and a `component` (https://angular.dev/guide/routing/define-routes).
 - `<router-outlet />` appears in the examples on https://angular.dev/guide/routing/common-router-tasks. The page's prose does not say what it does, so that role is not confirmed from the page.
 - Navigation links use `RouterLink` with a link array (same page).
-- Guards: https://angular.dev/guide/routing lists "Navigation guards" and links to "Control route access with guards". `not verified offline`: the guard API (`canActivate`, functional guards). The page read did not name it; check the guard guide on angular.dev before use.
+- Guards: https://angular.dev/guide/routing lists "Navigation guards" and links to "Control route access with guards". The guard function type is documented as `CanActivateFn`, "The signature of a function used as a `canActivate` guard on a Route" (https://angular.dev/api/router/CanActivateFn).
 - Resolvers: "Fetch data before route activation using resolver functions" (https://angular.dev/guide/routing/define-routes). A title resolver is typed with `ResolveFn`, for example `const titleResolver: ResolveFn<string> = (route) => ...` (same page).
 - Lazy loading: `loadComponent: () => import('./...')` and `loadChildren: () => import('./...')` (https://angular.dev/guide/routing/loading-strategies). `loadComponent` lazily loads a component when its route is active; `loadChildren` lazily loads child routes.
 

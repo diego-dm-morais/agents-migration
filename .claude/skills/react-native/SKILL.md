@@ -27,7 +27,7 @@ Practice for React Native code, used when React Native is the source or the targ
 
 ## 3. Idioms
 
-- Build the UI from core components: `View`, `Text`, `Pressable`, `ScrollView`, `FlatList`, `TextInput`, `Image`. Text rendering rules (for example, strings outside `Text`) were not verified offline: check the Text page before relying on them.
+- Build the UI from core components: `View`, `Text`, `Pressable`, `ScrollView`, `FlatList`, `TextInput`, `Image`. Text rendering rule: "you must wrap all the text nodes inside of a `<Text>` component. You cannot have a text node directly under a `<View>`" (https://reactnative.dev/docs/text).
 - Styles: `StyleSheet.create` returns the styles object. It is "An identity function for creating styles" and gives static type checking, not runtime validation (https://reactnative.dev/docs/stylesheet). Keep the source's style values; do not replace them with values from a design system.
 - Flexbox: React Native's defaults differ from CSS on the web. `flexDirection` defaults to `column`, `alignContent` to `flex-start`, `flexShrink` to `0`, and the `flex` prop accepts only a single number (https://reactnative.dev/docs/flexbox). Set `flexDirection: 'row'` explicitly wherever the source lays out a row.
 - Handle presses with `Pressable`, which "can detect various stages of press interactions on any of its defined children" (https://reactnative.dev/docs/pressable).
@@ -98,7 +98,7 @@ Run each command in the project root and report its real output. A gate that did
 ## 12. Anti-patterns
 
 - Relying on the CSS default for `flexDirection` or `flexShrink` in a React Native layout.
-- Text placed outside a `Text` component, without checking the Text page first (not verified offline).
+- Text placed outside a `Text` component: React Native raises an exception for a text node directly under a `<View>` (https://reactnative.dev/docs/text).
 - `SafeAreaView` from React Native core for new safe-area handling: it is deprecated and iOS only; use `react-native-safe-area-context` (https://reactnative.dev/docs/safeareaview).
 - `TouchableOpacity` where the source uses `Pressable` semantics, or the reverse, without a parity test on press states.
 - `KeyboardAvoidingView` without a `behavior` value. "On both iOS and Android, setting `behavior` is recommended" (https://reactnative.dev/docs/keyboardavoidingview).

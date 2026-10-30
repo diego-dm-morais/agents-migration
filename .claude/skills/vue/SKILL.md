@@ -16,14 +16,14 @@ Practice for Vue 3 code, used when Vue is the source or the target of a migratio
 - The release page states the policy: minor releases add features, typically 3 to 6 months apart, and go through a beta phase (https://vuejs.org/about/releases.html).
 - Target the versions the project pins in `package.json` and its lockfile. Record Vue, Vue Router, Pinia, Vitest and @vue/test-utils versions in the report.
 - Vitest requires Vite 6.4.0 or later and Node 22.12.0 or later (https://vitest.dev/guide/). Check these against the project's pins.
-- Vue 2 is a different major version with its own end of life. This skill covers Vue 3 only. Its end-of-life date was not verified offline.
+- Vue 2 is a different major version with its own end of life. This skill covers Vue 3 only. Vue 2 reached end of life on December 31, 2023 (https://v2.vuejs.org/eol/).
 
 ## 2. Layout and build
 
 - A single-file component (SFC) is a `.vue` file that holds a `<template>`, a `<script>` or `<script setup>` block, and an optional `<style>` block. The docs say that with a build step, components are "typically" defined in a dedicated `.vue` file (https://vuejs.org/guide/essentials/component-basics.html; https://vuejs.org/guide/scaling-up/sfc.html).
 - Use `<script setup>`: the docs present it as the main form. Imported components are available to the template without registration. `defineProps` and `defineEmits` are compile-time macros that need no import (https://vuejs.org/guide/essentials/component-basics.html).
 - Use `<style scoped>` to limit CSS to one component. Scoped CSS is applied with a `data-v-xxxx` attribute added to the component's elements. The parent's scoped styles do not leak into child components, but a child's root node is affected by both (https://vuejs.org/api/sfc-css-features.html).
-- Tests live beside the code or in `test/`. Each test file name ends in `.spec.ts` or `.test.ts` in the usual layout. The Vitest default include pattern was not verified offline: check `vitest.config` before use.
+- Tests live beside the code or in `test/`. Each test file name ends in `.spec.ts` or `.test.ts` in the usual layout. The Vitest default include pattern is `['**/*.{test,spec}.?(c|m)[jt]s?(x)']` (https://vitest.dev/config/include).
 - Split by responsibility: pure TypeScript or JavaScript logic in composables and plain modules that read no clock and touch no DOM; stores for shared state; components that show state and emit events. Tests import the pure modules.
 - Keep the target's folder layout and route names in the plan. Do not invent a router path or store id.
 
@@ -63,7 +63,7 @@ const doubled = computed(() => count.value * 2)
 
 ## 5. Reactivity and concurrency
 
-- The Vue scheduler batches DOM updates. The exact flush timing was not verified offline: use `nextTick` from `vue` only when a test or the source requires a DOM read after a change (verify the `nextTick` page before use).
+- The Vue scheduler batches DOM updates: "Vue buffers them until the 'next tick'" (https://vuejs.org/api/general.html). Watchers run before component rendering by default, and `flush: 'post'` defers them until after rendering (https://vuejs.org/api/reactivity-core.html). Use `nextTick` from `vue` only when a test or the source requires a DOM read after a change; it "can be used immediately after a state change to wait for the DOM updates to complete" (https://vuejs.org/api/general.html).
 - `watchEffect` with an async callback tracks only the dependencies read before the first `await` (https://vuejs.org/guide/essentials/watchers.html).
 - A store action that awaits a request must check whether the result is still wanted before it writes state the source would not write. The source's behavior decides.
 
@@ -81,7 +81,7 @@ const doubled = computed(() => count.value * 2)
 - Runner: Vitest. "To run tests once without watching for file changes, use `vitest run`" (https://vitest.dev/guide/). Vitest is "powered by Vite" and reads `vite.config.*` by default (same page).
 - Component tests use Vue Test Utils (VTU): "a set of utility functions aimed to simplify testing Vue.js components" (https://test-utils.vuejs.org/guide/). Its main method is `mount`. `shallowMount` "behaves exactly like `mount`, but it stubs all child components by default" (https://test-utils.vuejs.org/api/).
 - Wrapper methods: `find` "Finds an element and returns a `DOMWrapper`", `text` "Returns the text content of an element", `trigger` "Triggers a DOM event", `setProps` "Updates component props" (https://test-utils.vuejs.org/api/). `global.plugins` installs plugins, and `global.stubs` sets global stubs (same page).
-- The Vitest default environment is Node. The `environment` option accepts `'node' | 'jsdom' | 'happy-dom' | 'edge-runtime'` and can be set per file with a `@vitest-environment` comment (https://vitest.dev/config/environment). Component tests need `jsdom` or `happy-dom`; the config file key was not verified offline (see references/testing-and-tooling.md).
+- The Vitest default environment is Node. The `environment` option accepts `'node' | 'jsdom' | 'happy-dom' | 'edge-runtime' | string` and can be set per file with a `@vitest-environment` comment (https://vitest.dev/config/environment). Component tests need `jsdom` or `happy-dom`; the config key is `environment` (https://vitest.dev/config/environment) (see references/testing-and-tooling.md).
 - Stores in tests: `createTestingPinia()` from `@pinia/testing` "stubs out all store actions unless told otherwise"; `stubActions: false` runs the real actions (https://pinia.vuejs.org/cookbook/testing.html).
 - Name each test with its rule id when there is one, and keep one behavior per test:
 
@@ -101,7 +101,7 @@ describe('BR-CART-002', () => {
 
 Run each command in the project root and report its real output. A gate that did not run is not a pass. No toolchain was installed in this run, so none of these commands was run here.
 
-1. Type check: a project-declared command, for example `vue-tsc --noEmit`. The command was not verified offline: read `package.json` scripts first.
+1. Type check: a project-declared command, for example `vue-tsc --noEmit`. Not verified offline and not in the official pages read: read `package.json` scripts first.
 2. Unit and component tests: `npx vitest run`. Pass means every test passes. Read the exit code from the process, not the summary text alone.
 3. Build: the project's `build` script (for Vite projects, `vite build`). Not verified offline.
 4. Lint and format: the project's configured tool (ESLint, Prettier or Biome). Not verified offline: use the project's scripts.

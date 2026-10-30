@@ -41,7 +41,7 @@ Read this when the source you migrate from is Dart or Flutter. These are the pla
 ## Errors and exit
 
 - `throw 'boom';` is legal, because any non-null object can be thrown (https://dart.dev/language/error-handling). A handler written for `Exception` does not match a `String` by type: verify before use.
-- `int.parse('0x1F')` accepts a `0x` prefix when no radix is given, which gives 31 by the documented rule. Derived, not run: verify before use (https://api.dart.dev/stable/dart-core/int/parse.html).
+- `int.parse('0x1F')` accepts a `0x` prefix when no radix is given, which gives 31 by the documented rule. The page states: "If no `radix` is given then it defaults to 10. In this case, the `source` digits may also start with `0x`" (https://api.dart.dev/stable/dart-core/int/parse.html). Not run.
 - `exit(1)` drops buffered output and skips `finally` blocks (https://api.dart.dev/stable/dart-io/exit.html).
 - Setting `exitCode = 1` and then ending normally exits with 1 (https://api.dart.dev/stable/dart-io/exitCode.html).
 

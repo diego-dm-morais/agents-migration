@@ -6,7 +6,7 @@ Texto exibido por `/migrate help` e na primeira resposta de uma sessão sem migr
 
 | Comando | O que faz |
 |---|---|
-| `/migrate init` | Prepara o projeto. Pergunta só o que falta em `MIGRATION.md` (origem, destino, tipo de unidade, idiomas). Cria o snapshot da origem, confere o pin (`pin OK`), lista as unidades candidatas e grava no backlog só as que você confirmar. |
+| `/migrate init` | Prepara o projeto. Pergunta só o que falta em `MIGRATION.md` (origem, destino, tipo de unidade, idiomas). Cria o snapshot da origem, confere o pin (`pin OK`), roda o preflight (runtimes e imagens Docker) e pede uma só vez o que estiver faltando. Lista as unidades candidatas e grava no backlog só as que você confirmar. |
 | `/migrate` ou `/migrate status` | Mostra o estado de cada etapa de cada unidade e o prazo. Não altera arquivos. |
 | `/migrate <unidade>` | Roda as etapas em ordem (extract, spec, plan, tasks) até a unidade ficar READY ou até uma parada. O build só roda se você pedir. |
 | `/migrate <unidade> <etapa>` | Roda só uma etapa. As etapas anteriores precisam estar OK. |

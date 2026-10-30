@@ -101,7 +101,8 @@ Notas:
 | `tools` | lista separada por vírgula |
 | `skills` | lista em linhas próprias; pré-carrega as skills |
 | `color` | cor do agente |
-| `effort` | `xhigh` nos 7 agentes |
+| `model` | `claude-haiku-5-5` nos 7 agentes. Decisão de 2026-10-30; o gate (`tests/gate_format.py`, `PINNED_MODEL`) aceita só esse valor |
+| `effort` | `high` nos 7 agentes (decisão de 2026-10-30) |
 
 Os sete agentes pré-carregam `migration-conduct` no campo `skills`.
 
@@ -142,8 +143,9 @@ Um **prompt** é o texto de instruções que o agente ou a skill recebe. Ele cus
   2. um parágrafo com o papel;
   3. `## Inputs`, com o que o prompt de despacho traz e o que ler antes;
   4. o procedimento, em `## Procedure` ou em uma seção `## Mode <nome>` por modo;
-  5. `## Rules`;
-  6. `## Final message`.
+  5. `## Final message`.
+
+  As regras (`## Rules`), o bloco de UI e o modo de arquitetura não ficam no prompt. Moram em `skills/migrate/references/agent-rules/<agente>.md`, e o agente lê o próprio arquivo com Read antes do passo 1 (decisão de 2026-10-30). Assim o prompt do agente cabe no orçamento e as regras continuam obrigatórias.
 - **Procedimento.** Passos numerados, com o comando completo do `check.sh` entre crases e o caminho exato do artefato.
 - **Descrição de skill.** O campo `description` é o gatilho de carga de uma skill de linguagem. Ele diz a linguagem, o escopo e quando usar (`skills.md`, seção Como uma skill é acionada).
 - **Orçamento.** Cada agente tem até 100 linhas e 7 KiB, e os sete juntos têm até 43 KiB (`tests/gate_format.py`; veja Tamanhos). Os `SKILL.md` têm limite de 500 linhas, pelo mesmo gate. O que não muda a saída de uma etapa fica de fora.
@@ -153,11 +155,12 @@ Um **prompt** é o texto de instruções que o agente ou a skill recebe. Ele cus
 
 O gate `tests/gate_format.py` limita os agentes: até 100 linhas e 7 KiB cada, e 43 KiB no total. O `check.sh` não mede tamanho. Skills e referências não têm limite próprio, além das 500 linhas do `SKILL.md`.
 
-A tabela mostra a medida do estado atual, feita em 2026-10-29. Ela não é uma regra.
+A tabela mostra a medida do estado atual, feita em 2026-10-30. Ela não é uma regra.
 
 | Arquivo | Medida atual |
 |---|---|
-| `agents/*.md` (7) | de 51 a 67 linhas; de 4.480 a 7.034 bytes (maior em bytes: `agents/migration-planner.md`; maior em linhas: `agents/doc-writer.md`) |
+| `agents/*.md` (7) | de 38 a 54 linhas; de 3.708 a 5.511 bytes; 33.151 bytes no total (maior em bytes: `agents/migration-planner.md`; maior em linhas: `agents/doc-writer.md`) |
+| `skills/migrate/references/agent-rules/*.md` (7) | de 2.299 a 4.827 bytes (regras, bloco de UI e modo de arquitetura de cada agente, fora do orçamento do gate) |
 | `skills/*/SKILL.md` (14) | de 79 a 170 linhas (menor: `skills/migrate/SKILL.md`; maior: `skills/flutter/SKILL.md`) |
 | `skills/*/references/*.md` | até 260 linhas (maior: `skills/migrate/references/templates.md`) |
 | `description` | até 332 caracteres, com aspas (`skills/nodejs/SKILL.md`) |

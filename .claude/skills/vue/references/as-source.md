@@ -18,13 +18,13 @@ Read this when the source you migrate from is Vue. These are the places where th
 - `watch` is lazy: its callback does not run at setup unless `immediate: true` is set (https://vuejs.org/guide/essentials/watchers.html).
 - `watch` is shallow: a nested change does not run the callback unless `deep: true` is set (same page).
 - `watchEffect` runs at once and tracks only the reads before its first `await` (same page).
-- Watcher callbacks run asynchronously after a change, batched by the scheduler. The exact flush timing was not verified offline: when a source reads the DOM right after a state change, test that read before writing the target.
+- Watchers run just prior to component rendering by default; `flush: 'post'` runs them after rendering and `flush: 'sync'` runs them immediately on change (https://vuejs.org/api/reactivity-core.html). DOM updates are buffered until the next tick (https://vuejs.org/api/general.html). When a source reads the DOM right after a state change, test that read before writing the target.
 
 ## Components and props
 
 - `defineProps` and `defineEmits` are compile-time macros in `<script setup>` (https://vuejs.org/guide/essentials/component-basics.html).
 - A prop value can be any type unless the component declares a type (same page).
-- Declared emits are not applied as native listeners to the root element; undeclared listeners may fall through to the root (same page). The fallthrough rule was not read in full: verify the attribute-inheritance page before use.
+- Declared emits are not applied as native listeners to the root element; undeclared listeners may fall through to the root (same page). The attribute-inheritance page states that undeclared `v-on` listeners are added to the root element, and that declared props and listeners are "consumed" and not forwarded (https://vuejs.org/guide/components/attrs.html).
 - `<style scoped>` adds a `data-v-xxxx` attribute to the component's elements. A child component's root is styled by both the parent's and the child's scoped CSS (https://vuejs.org/api/sfc-css-features.html).
 - `:deep()` reaches into child components. Content created with `v-html` is not affected by scoped styles (same page).
 - `<style module>` exposes classes under `$style`, hashed to avoid collision (same page).

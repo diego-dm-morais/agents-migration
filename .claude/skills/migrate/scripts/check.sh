@@ -6,12 +6,15 @@
 #   sh check.sh status [unit]   one line per stage, then "<unit> ready YES|NO"
 #   sh check.sh pin             snapshot HEAD must equal source_sha
 #   sh check.sh deadline        project deadline of MIGRATION.md: none, or the days left (OVERDUE when passed)
-#   sh check.sh cites <file>    each path:line @sha7 resolves in the snapshot
+#   sh check.sh preflight       runtimes and docker images the unit needs on this machine (OK, MISSING, UNKNOWN, WAIVED)
+#   sh check.sh cites <file>    each path:line @sha7 resolves in the snapshot; each quoted snippet is inside its range
 #   sh check.sh symbols <file>  each backticked identifier next to a citation appears in the cited file (advisory)
 #   sh check.sh env             env and config names the source reads, with path:line; never values (heuristic)
-#   sh check.sh ids [unit]     duplicate ids; BR->spec and FR->tasks coverage
+#   sh check.sh ids [unit]      duplicate ids; BR->spec and FR->tasks coverage
 #   sh check.sh adr [unit]      ADR files: keys, sections, citations, unique ids; DEC->ADR coverage of the unit
-#   sh check.sh hash <file>     cksum of the body (no frontmatter), LF only
+#   sh check.sh hash <file>     contract hash: cksum of the body without Gaps, Closure checklist, Notes, Open items
+#   sh check.sh hash-full <file> cksum of the whole body (no frontmatter), LF only
+#   sh check.sh show <unit> <stage> <id>...  only the named "### <id>" blocks of an artifact
 #   sh check.sh scope <unit>    cksum of the files of the done tasks (review and doc stamp it)
 #
 # Frontmatter is read as flat "key: value" lines between the first two "---".
@@ -45,6 +48,31 @@ body() {
 bhash() {
   [ -f "$1" ] || return 0
   body "$1" | cksum | awk '{ print $1 }'
+}
+
+# chash <file>: cksum of the contract part of the body: every line except the sections that hold
+# notes and progress (Gaps, Closure checklist, Notes, Open items). Downstream stages stamp this one.
+chash() {
+  [ -f "$1" ] || return 0
+  body "$1" | awk '
+    /^## / { skip = ($0 == "## Gaps" || $0 == "## Closure checklist" || $0 == "## Notes" || $0 == "## Open items") }
+    !skip { print }' | cksum | awk '{ print $1 }'
+}
+
+# up_match <stamp> <file>: the stamp is the contract hash of the file, or the full-body hash of an
+# artifact written before the contract hash existed (same body, so not stale)
+up_match() {
+  [ "$1" = "$(chash "$2")" ] || [ "$1" = "$(bhash "$2")" ]
+}
+
+# show_blocks <file> <id>...: the "### <id>" blocks named, each up to the next heading of level 2 or 3
+show_blocks() {
+  f=$1; shift
+  ids=" $* "
+  tr -d '\r' < "$f" | awk -v ids="$ids" '
+    /^## / { on = 0; next }
+    /^### / { id = $2; sub(/:$/, "", id); on = (index(ids, " " id " ") > 0) }
+    on { print }'
 }
 
 sha7() { printf '%s' "$1" | cut -c1-7; }
@@ -265,6 +293,39 @@ rules_without_evidence() {
     END { flush() }'
 }
 
+# rules_without_quote <extraction>: " no-quote-<BR id>" for each rule block whose citation carries no quoted snippet
+rules_without_quote() {
+  [ -f "$1" ] || return 0
+  tr -d '\r' < "$1" | awk '
+    function flush() { if (cur != "" && !ok) printf " no-quote-%s", cur; cur = ""; ok = 0 }
+    /^### BR-/ { flush(); cur = $2; sub(/:$/, "", cur); next }
+    /^### / { flush(); next }
+    cur != "" && /@[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]`? +"[^"]+"/ { ok = 1 }
+    END { flush() }'
+}
+
+# A snippet is a quoted text right after a citation: `path:line @sha7` "snippet" (the backtick is optional).
+# Quotes that follow no citation are prose and are not checked.
+QUOTE_PAIR='[A-Za-z0-9_./-]+:[0-9]+(-[0-9]+)? @[0-9a-f]{7}`? +"[^"]+"'
+
+# quotes_bad <file>: "quote=<path>:<lines>:not-in-range" for each snippet that is not on one line of its cited range.
+# The snippet is read from the snapshot.
+quotes_bad() {
+  [ -f "$1" ] || return 0
+  sroot=$(fm "$MIG" source_root); sroot=${sroot:-.}
+  snap=$(fm "$MIG" source_snapshot)
+  tr -d '\r' < "$1" | grep -Eo "$QUOTE_PAIR" | while IFS= read -r pair; do
+    c=$(printf '%s' "$pair" | grep -Eo '^[^ `"]+:[0-9]+(-[0-9]+)? @[0-9a-f]{7}')
+    q=$(printf '%s' "$pair" | sed 's/^[^"]*"//; s/"$//')
+    p=${c%%:*}; r=${c#*:}; lp=${r%% *}
+    start=${lp%%-*}; end=${lp#*-}; [ "$end" = "$lp" ] && end=$start
+    f="$snap/$sroot/$p"
+    if [ ! -f "$f" ]; then printf 'quote=%s:%s:file-missing\n' "$p" "$lp"; continue; fi
+    if sed -n "${start},${end}p" "$f" | tr -d '\r' | grep -qF -- "$q"; then :
+    else printf 'quote=%s:%s:not-in-range\n' "$p" "$lp"; fi
+  done
+}
+
 # frs_without_source <spec>: " no-source-<FR id>" for each FR block without "Source: BR-"
 frs_without_source() {
   [ -f "$1" ] || return 0
@@ -358,12 +419,12 @@ check_artifact() {
     v=$(fm "$f" "upstream_$x")
     if [ -z "$v" ]; then bad="$bad upstream_$x-absent"
     elif [ ! -f "docs/migration/$u/$x.md" ]; then bad="$bad upstream_$x-file-missing"
-    elif [ "$(bhash "docs/migration/$u/$x.md")" != "$v" ]; then stale="$stale upstream_$x"
+    elif ! up_match "$v" "docs/migration/$u/$x.md"; then stale="$stale upstream_$x"
     fi
   done
   case "$s" in
     extract)
-      bad="$bad$(dup_ids "$f")$(cites_tokens "$f")$(rules_without_evidence "$f")$(dec_issues "$f")"
+      bad="$bad$(dup_ids "$f")$(cites_tokens "$f")$(rules_without_evidence "$f")$(rules_without_quote "$f")$(dec_issues "$f")"
       es=$(fm "$f" source_sha)
       if [ -z "$es" ]; then bad="$bad source_sha-absent"
       elif [ "$es" != "$(fm "$MIG" source_sha)" ]; then stale="$stale source_sha"
@@ -456,7 +517,7 @@ doc_line() {
     row=$(tr -d '\r' < "$f" | grep -E "^\|[[:space:]]*$x[[:space:]]*\|" | head -n 1)
     if [ -z "$row" ]; then bad="$bad row:$x-absent"; continue; fi
     rec=$(printf '%s\n' "$row" | awk -F '|' '{ v = $3; gsub(/[[:space:]]/, "", v); print v }')
-    [ "$rec" = "$(bhash "$sf")" ] || stale="$stale source:$x"
+    up_match "$rec" "$sf" || stale="$stale source:$x"
   done
   for af in "$ADR_DIR"/ADR-*.md; do
     [ -f "$af" ] || continue
@@ -465,7 +526,7 @@ doc_line() {
     row=$(tr -d '\r' < "$f" | grep -E "^\|[[:space:]]*$aid[[:space:]]*\|" | head -n 1)
     if [ -z "$row" ]; then bad="$bad row:$aid-absent"; continue; fi
     rec=$(printf '%s\n' "$row" | awk -F '|' '{ v = $3; gsub(/[[:space:]]/, "", v); print v }')
-    [ "$rec" = "$(bhash "$af")" ] || stale="$stale source:$aid"
+    up_match "$rec" "$af" || stale="$stale source:$aid"
   done
   [ "$(fm "$f" scope_hash)" = "$(scope_hash "$u")" ] || stale="$stale scope_hash"
   case "$(unit_platform)" in
@@ -515,8 +576,22 @@ ids_report() {
 do_cites() {
   [ -f "$1" ] || { echo "cites MISSING $1"; return; }
   n=$(tr -d '\r' < "$1" | grep -Eo '[A-Za-z0-9_./-]+:[0-9]+(-[0-9]+)? @[0-9a-f]{7}' | sort -u | wc -l | tr -d ' ')
-  bad=$(cites_bad "$1" | tr '\n' ' ')
-  if [ -z "$bad" ]; then echo "cites OK $n $1"; else echo "cites INVALID $n $1 $bad"; fi
+  m=$(tr -d '\r' < "$1" | grep -Eo "$QUOTE_PAIR" | wc -l | tr -d ' ')
+  bad=$(cites_bad "$1" | tr '\n' ' ')$(quotes_bad "$1" | tr '\n' ' ')
+  if [ -z "$bad" ]; then echo "cites OK $n $1 quotes=$m"; else echo "cites INVALID $n $1 $bad quotes=$m"; fi
+}
+
+# do_show <unit> <stage> <id>...: the blocks of one artifact that the ids name, nothing else
+do_show() {
+  u=$1; s=$2; shift 2
+  case "$s" in extraction|spec|plan|tasks|review) ;; *) echo "show INVALID stage=$s"; return ;; esac
+  f="docs/migration/$u/$s.md"
+  [ -f "$f" ] || { echo "show MISSING $f"; return; }
+  [ $# -ge 1 ] || { echo "show INVALID no-ids"; return; }
+  for id in "$@"; do
+    tr -d '\r' < "$f" | grep -qE "^### $id(:| |\$)" || echo "show MISSING-ID $id in $f"
+  done
+  show_blocks "$f" "$@"
 }
 
 # symbols_bad <file>: "symbol=<token>:<path>:not-in-cited-files" for each backticked identifier that sits on a
@@ -572,8 +647,105 @@ do_env() {
   [ -z "$out" ] || printf '%s\n' "$out"
 }
 
+# contract: SubagentStop hook of the migration agents. Reads the hook JSON on stdin. When the final message of a
+# migration agent breaks the final message contract (migration-conduct section 12), the stop is blocked once with
+# the reason; a stop that follows a block (stop_hook_active) is allowed, so the hook never loops.
+do_contract() {
+  input=$(cat)
+  case "$input" in *'"stop_hook_active": true'*|*'"stop_hook_active":true'*) return 0 ;; esac
+  agent=$(printf '%s' "$input" | sed -n 's/.*"agent_type" *: *"\([^"]*\)".*/\1/p' | head -n 1)
+  case "$agent" in
+    behavior-extractor|spec-writer|migration-planner|task-decomposer|implementer|parity-reviewer|doc-writer) ;;
+    *) return 0 ;;
+  esac
+  msg=$(printf '%s' "$input" | sed -n 's/.*"last_assistant_message" *: *"\(.*\)"[,}].*/\1/p' | head -n 1)
+  probs=""
+  for k in 'Result:' 'Checks:' 'Skills:' 'NEEDS:'; do
+    case "$msg" in *"$k"*) ;; *) probs="$probs missing-$k" ;; esac
+  done
+  nl=$(printf '%s' "$msg" | sed 's/\\n/\n/g' | wc -l | tr -d ' ')
+  nl=$((nl + 1))
+  [ "$nl" -gt 12 ] && probs="$probs more-than-12-lines"
+  [ -z "$probs" ] && return 0
+  printf '{"decision": "block", "reason": "Final message breaks the migration-conduct contract:%s. Rewrite it in at most 12 lines, in order: Result, Written, Checks, Skills, Open (optional), Deviation (optional), NEEDS. Keys stay in English; no preamble, no recap."}\n' "$probs"
+}
+
+# preflight: the runtimes and images a unit needs on this machine, one line per item. Versions are read from
+# files of the source snapshot and from MIGRATION.md; nothing is installed or run. A failing item that the
+# user waived in MIGRATION.md ("- waived: <item> by user <date>") prints WAIVED instead.
+waived() { tr -d '\r' < "$MIG" | grep -qE "^- waived: $1( |\$)"; }
+
+# pf <item> <OK|MISSING|UNKNOWN> <detail>
+pf() {
+  if [ "$2" != OK ] && waived "$1"; then echo "preflight $1 WAIVED $3"; else echo "preflight $1 $2 $3"; fi
+}
+
+docker_ok() { command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; }
+
+# image_check <image>: the image is in the local docker cache
+image_check() {
+  if docker_ok && docker image inspect "$1" >/dev/null 2>&1; then pf "image:$1" OK "in local cache"
+  else pf "image:$1" MISSING "not in local cache, or docker unavailable"; fi
+}
+
+# first_line <file>: first line, CR removed, empty when the file is absent
+first_line() { [ -f "$1" ] && tr -d '\r' < "$1" | head -n 1; }
+
+do_preflight() {
+  sroot=$(fm "$MIG" source_root); sroot=${sroot:-.}
+  snap=$(fm "$MIG" source_snapshot)
+  root="$snap/$sroot"
+  if [ -z "$snap" ] || [ ! -d "$root" ]; then pf source-root MISSING "$root"; return; fi
+
+  sv=""
+  if [ -f "$root/go.mod" ]; then
+    v=$(tr -d '\r' < "$root/go.mod" | awk '/^go [0-9]/ { print $2; exit }')
+    [ -n "$v" ] && sv="go $v go.mod"
+  fi
+  if [ -z "$sv" ] && [ -n "$(first_line "$root/.python-version")" ]; then sv="python $(first_line "$root/.python-version") .python-version"; fi
+  if [ -z "$sv" ] && [ -f "$root/pyproject.toml" ]; then
+    v=$(tr -d '\r' < "$root/pyproject.toml" | sed -n 's/^requires-python *= *"[^0-9]*\([0-9][0-9.]*\).*/\1/p' | head -n 1)
+    [ -n "$v" ] && sv="python $v pyproject.toml"
+  fi
+  if [ -z "$sv" ] && [ -n "$(first_line "$root/.nvmrc")" ]; then sv="nodejs $(first_line "$root/.nvmrc") .nvmrc"; fi
+  if [ -n "$sv" ]; then pf source-runtime OK "$sv"
+  else pf source-runtime UNKNOWN "no go.mod, .python-version, pyproject requires-python or .nvmrc under $root"; fi
+
+  if docker_ok; then pf docker OK "daemon answers"; else pf docker MISSING "docker CLI or daemon not reachable"; fi
+
+  if [ -f "$root/Dockerfile" ]; then
+    img=$(tr -d '\r' < "$root/Dockerfile" | awk 'toupper($1) == "FROM" { print $2; exit }')
+    [ -n "$img" ] && image_check "$img"
+  fi
+  for cf in "$root"/docker-compose*.yml "$root"/docker-compose*.yaml "$root"/compose*.yml; do
+    [ -f "$cf" ] || continue
+    tr -d '\r' < "$cf" | sed -n 's/^[[:space:]]*image:[[:space:]]*\([^[:space:]#]*\).*/\1/p' | sort -u \
+      | while IFS= read -r img; do image_check "$img"; done
+  done
+
+  tl=$(fm "$MIG" target_language); tv=$(fm "$MIG" target_version)
+  case "$tl" in
+    python) tc="python$tv python3 python" ;;
+    nodejs|typescript|javascript) tc="node" ;;
+    golang) tc="go" ;;
+    *) tc="" ;;
+  esac
+  if [ -z "$tc" ]; then pf target-runtime UNKNOWN "target_language=${tl:-absent} has no version probe"
+  elif [ -z "$tv" ]; then pf target-runtime UNKNOWN "target_version absent in MIGRATION.md"
+  else
+    found=""
+    for c in $tc; do
+      command -v "$c" >/dev/null 2>&1 || continue
+      if [ "$c" = go ]; then out=$(go version 2>&1); else out=$("$c" --version 2>&1 | head -n 1); fi
+      case "$out" in *"$tv"*) found="$c: $out"; break ;; esac
+    done
+    if [ -n "$found" ]; then pf target-runtime OK "$found"
+    else pf target-runtime MISSING "target_version $tv not found (tried: $tc)"; fi
+  fi
+}
+
 usage() {
-  echo "usage: sh check.sh status [unit] | pin | deadline | cites <file> | symbols <file> | env | ids [unit] | adr [unit] | hash <file> | scope <unit>" >&2
+  echo "usage: sh check.sh status [unit] | pin | deadline | preflight | cites <file> | symbols <file> | env | ids [unit] | adr [unit] | hash <file> | hash-full <file> | show <unit> <stage> <id>... | scope <unit>" >&2
   exit 2
 }
 
@@ -608,7 +780,14 @@ case "$cmd" in
       for u in $(units); do ids_report "$u"; done
     fi ;;
   adr) adr_cmd "$@" ;;
-  hash) [ $# -eq 1 ] || usage; if [ -f "$1" ]; then bhash "$1"; else echo "hash MISSING $1"; fi ;;
+  hash) [ $# -eq 1 ] || usage; if [ -f "$1" ]; then chash "$1"; else echo "hash MISSING $1"; fi ;;
+  hash-full) [ $# -eq 1 ] || usage; if [ -f "$1" ]; then bhash "$1"; else echo "hash MISSING $1"; fi ;;
+  show)
+    [ $# -ge 3 ] || usage
+    valid_unit "$1" || { echo "unit INVALID $1"; exit 0; }
+    do_show "$@" ;;
+  preflight) do_preflight ;;
+  contract) do_contract ;;
   scope)
     [ $# -eq 1 ] || usage
     valid_unit "$1" || { echo "unit INVALID $1"; exit 0; }

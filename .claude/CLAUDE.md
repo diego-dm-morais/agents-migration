@@ -49,6 +49,8 @@ At the first reply of each session in this project, before any other work:
 
 Also: source bugs stay as `known-issue`; a conflict between a standard and the behavior is recorded as `deviation` with its reason. Report the real output of every command; a gate that did not run is not a pass.
 
+Core and border (decided 2026-10-30, migration-conduct section 1a): a core gap blocks the unit; a border gap (behavior the framework decides and the spec does not state) is `deferred-capture <id>` in Gaps, and the build settles it with a golden capture. Parity for a border gap is `not proven` until that capture passes.
+
 ## Project memory
 
 - This project's Claude memory is stored in `.claude/memory/` (inside the local repo), with `MEMORY.md` as the index and one file per memory (frontmatter `name`, `description`, `metadata.type`).

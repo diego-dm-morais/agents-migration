@@ -65,7 +65,7 @@ fun myTest() {
 }
 ```
 
-- The page shows `setContent`, `onNodeWithText`, `performClick` and `assertIsDisplayed` in sample code only, with no prose. Their full reference: not verified offline.
+- `setContent` and `createComposeRule` are described in prose on https://developer.android.com/develop/ui/compose/testing. `onNodeWithText`, `performClick` and `assertIsDisplayed` appear there in sample code only (same page).
 - State restoration in tests: the saved-state page mentions `StateRestorationTester` for verifying restoration (https://developer.android.com/develop/ui/compose/state-saving). Its API: not verified offline.
 
 ## ViewModel and Flow tests

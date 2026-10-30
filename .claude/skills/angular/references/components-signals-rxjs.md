@@ -28,8 +28,8 @@ count.update((n) => n + 1);
 
 ## RxJS
 
-- `not verified offline`: an `Observable` is lazy, and teardown runs on `unsubscribe` (https://rxjs.dev/guide/observable). The rxjs.dev page returned only its title when fetched; check the page before citing.
-- `not verified offline`: flattening operators (`switchMap` cancels the previous inner subscription; `concatMap` queues; `mergeMap` runs in parallel; `exhaustMap` ignores new values while one runs). The rxjs.dev operator pages returned only their title when fetched; verify the text on https://rxjs.dev/api/operators/switchMap and https://rxjs.dev/api/operators/concatMap before citing.
+- An `Observable` is lazy: "calling `subscribe` is actually the moment when Observable starts its work, not when it is created" (https://unpkg.com/rxjs@7.8.2/src/internal/Observable.ts). Teardown runs on `unsubscribe`: `Subscription.add()` adds a finalizer "so that finalization will be unsubscribed/called", run by `unsubscribe()` (https://unpkg.com/rxjs@7.8.2/src/internal/Subscription.ts).
+- Flattening operators (RxJS 7.8.2 source): `switchMap` stops emitting from the earlier inner Observable when a new one arrives (https://unpkg.com/rxjs@7.8.2/src/internal/operators/switchMap.ts); `concatMap` waits "for each one to complete before merging the next" (https://unpkg.com/rxjs@7.8.2/src/internal/operators/concatMap.ts); `mergeMap` defaults to `concurrent = Infinity`, so inners run in parallel (https://unpkg.com/rxjs@7.8.2/src/internal/operators/mergeMap.ts); `exhaustMap` "ignores every new projected Observable if the previous projected Observable has not yet completed" (https://unpkg.com/rxjs@7.8.2/src/internal/operators/exhaustMap.ts).
 - In a template, the `async` pipe "subscribes to an Observable or Promise" and "unsubscribes automatically" when the component is destroyed (https://angular.dev/api/common/AsyncPipe).
 - `toSignal` (from `@angular/core/rxjs-interop`) returns `Signal<T | undefined>` unless `requireSync: true`, in which case "No `initialValue` is needed" and the type has no `undefined` (https://angular.dev/api/core/rxjs-interop/toSignal).
 

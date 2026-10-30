@@ -7,13 +7,13 @@ Read this when the source you migrate from is Angular. These are the places wher
 - A signal write does not run the template at once. Angular re-runs the consumer "eventually" (https://angular.dev/guide/signals). A source that reads the DOM right after a write sees the old value.
 - `computed()` "does not run to calculate its value until the first time you read" it, and its value is cached (https://angular.dev/guide/signals). A source that expects every read to recompute differs when the input is unchanged.
 - Assigning to a `computed()` with `.set()` is a compilation error (same page). A source that compiles has no such write.
-- "you might find yourself needing a writable state that is dependent on other signals": the page points to `linkedSignal` for it (https://angular.dev/guide/signals). `not verified offline`: the `linkedSignal` API details.
+- "you might find yourself needing a writable state that is dependent on other signals": the page points to `linkedSignal` for it (https://angular.dev/guide/signals). The `linkedSignal` API is documented at https://angular.dev/api/core/linkedSignal: "Creates a writable signal whose value is initialized and reset by the linked, reactive computation."
 - The reactive context is "only active for synchronous code": a signal read after an `await` is not tracked (https://angular.dev/guide/signals).
 
 ## RxJS
 
-- `not verified offline`: observables are lazy (nothing runs until `subscribe`) (https://rxjs.dev/guide/observable). The rxjs.dev pages returned only their title when fetched; check the page directly before citing.
-- `not verified offline`: flattening operators differ (`switchMap`, `concatMap`, `mergeMap`, `exhaustMap`). A source that fires each request and keeps every reply differs from one that uses `switchMap`. Verify the semantics on https://rxjs.dev/api/operators/switchMap and https://rxjs.dev/api/operators/concatMap before citing.
+- Observables are lazy: "calling `subscribe` is actually the moment when Observable starts its work" (https://unpkg.com/rxjs@7.8.2/src/internal/Observable.ts).
+- Flattening operators differ (RxJS 7.8.2 source): `switchMap` drops the earlier inner (https://unpkg.com/rxjs@7.8.2/src/internal/operators/switchMap.ts); `concatMap` queues (https://unpkg.com/rxjs@7.8.2/src/internal/operators/concatMap.ts); `mergeMap` runs in parallel by default (https://unpkg.com/rxjs@7.8.2/src/internal/operators/mergeMap.ts); `exhaustMap` ignores new values while one is active (https://unpkg.com/rxjs@7.8.2/src/internal/operators/exhaustMap.ts). A source that fires each request and keeps every reply differs from one that uses `switchMap`.
 
 ## Forms
 

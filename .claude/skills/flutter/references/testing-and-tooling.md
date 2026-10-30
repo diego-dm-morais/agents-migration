@@ -71,5 +71,5 @@ void main() {
 
 - Use what the project already has. Add a package only when the plan names it and the gate needs it.
 - The Flutter SDK includes the full Dart SDK and the `dart` CLI (https://dart.dev/get-dart).
-- The `intl` package is published by dart.dev for localized messages, dates and numbers (https://pub.dev/packages/intl). Its API is not read in this run: verify before use.
+- The `intl` package is published by dart.dev for localized messages, dates and numbers (https://pub.dev/packages/intl; publisher shown as dart.dev, version 0.20.3 on the page). Its API is not read in this run: verify before use.
 - Read the flags of any command with its `help` output, and record the version you ran.
