@@ -1,0 +1,41 @@
+# Intake and init
+
+Read this for `/migrate init`, and when a new source or unit must be registered.
+
+## What `init` needs
+
+`init` asks only for what MIGRATION.md does not already have. Ask in groups of up to 4 questions per AskUserQuestion call:
+
+1. Source: language, version, repository (local path or URL), ref (tag, branch or commit), source root inside the repository (default `.`).
+2. Target: language, version, target root (default `.`), and the directory for the generated docs (default `docs`).
+3. Unit kind: function, class, module, HTTP operation, CLI command, job, or screen. One kind per migration.
+4. Languages of the artifacts and of the docs (default: the language the user writes in).
+5. Deadline, optional: ask once, with the options "No deadline (Recommended)" and "Enter a date". Write `deadline: none` for no deadline, or `deadline: YYYY-MM-DD` for a date. The default never blocks a unit. A deadline sets the order of the work and what fits in it. It never changes legacy behavior or skips a test (`migration-conduct` section 4).
+
+Then ask for the limits only if the user wants to change them: `limit_dispatch` 2, `limit_review_rounds` 3, `limit_fix_rounds` 2.
+
+## Create the snapshot
+
+The snapshot is a checkout of the source at the ref. It lives outside the target repository, so that nothing in the target is affected. Default: `../<target-directory-name>-source`.
+
+```
+git clone --no-checkout <source_repo> <snapshot>
+git -C <snapshot> checkout --detach <source_ref>
+git -C <snapshot> rev-parse HEAD
+```
+
+Write the full sha from the last command into `source_sha`, and the snapshot path into `source_snapshot` (relative to the target root). Then run `sh "${CLAUDE_SKILL_DIR}/scripts/check.sh" pin`. It must print `pin OK`.
+
+Never run a mutating git command in the source repository, and never write inside the snapshot.
+
+## Backlog
+
+Dispatch behavior-extractor in mode `survey` with the source root and the unit kind. It returns candidate units with their entry points and dependencies. Show the list to the user with AskUserQuestion, and write the confirmed units under `## Backlog` in MIGRATION.md. Unit ids come from the operation or symbol name, in lowercase kebab-case.
+
+## Secrets in input
+
+curl commands, collections (Postman, OpenAPI, Apidog exports) and configuration files can hold tokens and credentials. Replace each value with `<redacted>` in every file you write, and keep no copy of it. A collection is used only to list operations and their names. Its examples are never the source of behavior: the source code at the pin is.
+
+## Units
+
+A unit is the smallest piece that behaves on its own. Migrate units in dependency order from the backlog. The unit id must match `^[a-z0-9]+(-[a-z0-9]+)*$`.
