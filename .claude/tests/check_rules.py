@@ -55,6 +55,20 @@ for s in LANG:
         gaps.append(f"rule 1 skill {s}: needs '## Sources' with at least three https URLs (has {urls})")
 print(f"language skills: {len(LANG)} checked for rule 1 (Sources with URLs)")
 
+# Library research: each language skill names its registry, and the agents that add libraries
+# point to the shared procedure in migration-conduct/references/library-research.md.
+REGISTRY = ["pkg.go.dev", "pypi.org", "npmjs.com", "central.sonatype.com", "nuget.org", "crates.io", "pub.dev"]
+for s in LANG:
+    path = os.path.join(root, "skills", s, "SKILL.md")
+    text = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
+    if "## Library registry" not in text or not any(r in text for r in REGISTRY):
+        gaps.append(f"library research skill {s}: needs '## Library registry' with its registry URL")
+for a in ["migration-planner", "implementer"]:
+    path = os.path.join(root, "agents", a + ".md")
+    text = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
+    if "library-research" not in text:
+        gaps.append(f"library research agent {a}: must point to references/library-research.md")
+
 for g in gaps:
     print("GAP", g)
 print("rules:", "PASS" if not gaps else f"FAIL ({len(gaps)})")

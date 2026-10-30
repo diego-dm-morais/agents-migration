@@ -141,8 +141,16 @@ Record each command with its exit code and the output line that decides the resu
 - `let _ =` on a `Result` that carries a failure the source reports.
 - Regenerating a golden file from the port's output and calling the test passed.
 
+## Library registry
+
+- Registry: crates.io, https://crates.io/ (crate pages show versions, `rust-version` (MSRV), features, license, and the last publish date).
+- Before adding a crate, check the standard library first. Then search crates.io, open the crate page, and confirm: latest version, `rust-version` not above the target toolchain, enabled features, license, last publish, and open issues.
+- Pin the version in `Cargo.toml` and commit `Cargo.lock` (section 2). Check the MSRV with `cargo msrv` only if the repository already uses it.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
+- crates.io: https://crates.io/
 - Rust release announcements: https://blog.rust-lang.org/releases/
 - The Rust Programming Language (book): https://doc.rust-lang.org/book/
 - Standard library: https://doc.rust-lang.org/std/ (`primitive.f64`, `primitive.i32`, `primitive.slice`, `primitive.str`, `collections::HashMap`, `sync::Mutex`, `convert::From`, `convert::TryFrom`, `process::exit`, `process::Termination`, `fs`)

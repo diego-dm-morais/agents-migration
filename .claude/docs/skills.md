@@ -103,3 +103,23 @@ Uma skill de linguagem afirma fatos com fonte. As nove têm o mesmo bloco `metad
 4. **Gate não rodado é dito.** Quando um comando do gate não roda, a skill diz isso. Exemplo: `skills/flutter/SKILL.md`, diz que nenhum toolchain de Flutter ou Dart estava na máquina e que nenhum comando do gate foi rodado.
 5. **Baseline fixa.** Uma versão mais nova não muda a baseline sem nova verificação. Exemplo: `skills/golang/SKILL.md`, diz que a skill não move a baseline para go1.27.3.
 6. **Conferência manual.** `skills/migrate/scripts/check.sh` não tem subcomando para skills. Seus subcomandos são `status`, `pin`, `cites`, `ids`, `adr`, `hash` e `scope` (a estrutura `case` no fim de `check.sh`). Datas, versões e fontes das skills de linguagem não têm conferência automática. Confira esses itens à mão.
+
+## Pesquisa de bibliotecas
+
+Antes de recomendar ou adicionar uma biblioteca, o agente pesquisa no repositório oficial do ecossistema. Cada skill de linguagem tem uma seção `## Library registry` com o link do registro e aponta para o procedimento comum em `skills/migration-conduct/references/library-research.md`.
+
+| Linguagem | Registro |
+|---|---|
+| golang | https://pkg.go.dev/ |
+| python | https://pypi.org/ |
+| nodejs | https://www.npmjs.com/ |
+| typescript | https://www.npmjs.com/ |
+| javascript | https://www.npmjs.com/ |
+| java | Maven Central, https://central.sonatype.com/ |
+| dotnet | NuGet, https://www.nuget.org/ |
+| rust | crates.io, https://crates.io/ |
+| flutter | pub.dev, https://pub.dev/ |
+
+Ordem de pesquisa: o próprio repositório (manifesto, lockfile, listas permitidas e proibidas em `MIGRATION.md`), depois a biblioteca padrão, depois o registro. Só então código próprio. Cada candidato é checado quanto a versão oficial ou consolidada, manutenção, maturidade, compatibilidade com a versão da linguagem, licença e dependências transitivas. A versão vem da página do registro lida nesta execução, com URL. Uma versão de memória não é fato.
+
+Quem adiciona a biblioteca é o `implementer`, e só o que está na tabela `## Dependencies` do plano. O `migration-planner` registra essa tabela. O teste `.claude/tests/check_rules.py` confere que cada skill de linguagem tem a seção e que `migration-planner` e `implementer` apontam para o procedimento.

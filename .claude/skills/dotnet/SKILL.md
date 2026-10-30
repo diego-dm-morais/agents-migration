@@ -128,8 +128,16 @@ Run each command, read its result, and report the real output. A gate that did n
 - A struct with non-nullable reference fields created with `default`.
 - `DateTime.Now` in output that must be the same on every machine.
 
+## Library registry
+
+- Registry: NuGet, https://www.nuget.org/ (package pages show versions, the target frameworks each version supports, license and last publish date).
+- Before adding a package, check the .NET base class library first. Then search NuGet, open the package page, and confirm: latest version, supported `TargetFramework` (`netX.0`) compatible with the target project, license, last publish, and dependencies.
+- Read the exact versions from the package page or `dotnet package search <name>` and pin them in the `.csproj` (`PackageReference`) already used by the repository. Commit the lock file if the repository uses one.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
+- NuGet: https://www.nuget.org/
 - C# guide: https://learn.microsoft.com/en-us/dotnet/csharp/
 - What's new in C# 14: https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14
 - What's new in C# 15: https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15

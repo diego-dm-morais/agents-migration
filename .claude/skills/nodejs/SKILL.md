@@ -103,8 +103,16 @@ Run each command, read its result, and report the real output. A gate that did n
 - A global `fetch` patch in a test instead of an injected function.
 - A `setInterval` without a matching clear.
 
+## Library registry
+
+- Registry: https://www.npmjs.com/ (package pages show versions, `engines`, license, maintainers and last publish date).
+- Before adding a package, check the built-in modules first (`node:test`, `fetch`, `node:util`, and so on). Then search npm, open the package page, and confirm: latest version, `engines.node` compatible with the target Node.js line, license, last publish, and open issues.
+- Read the exact versions with `npm view <package> version engines` and pin them. Commit the lockfile.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
+- npm registry: https://www.npmjs.com/
 - Node.js 22 documentation, `test`, `cli`, `modules`, `esm`, `globals`, `util` pages: https://nodejs.org/docs/latest-v22.x/api/
 - Node.js releases page (LTS status): https://nodejs.org/en/about/previous-releases
 - ECMAScript 2027, Number.prototype.toFixed (21.1.3.3) and ToUint8Clamp (7.1.14): https://tc39.es/ecma262/

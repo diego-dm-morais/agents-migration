@@ -138,9 +138,17 @@ Run each command, read the real result, and report it. A gate that did not run i
 - `catch (e)` followed by `e.message` without narrowing.
 - A fake object cast to an interface to skip the compiler.
 
+## Library registry
+
+- Registry: https://www.npmjs.com/ (package pages show versions, `engines`, license, maintainers and last publish date). Type packages live under `@types/*` on the same registry.
+- Before adding a package, check the standard library and the TypeScript built-ins first. Then search npm, open the package page, and confirm: latest version, `engines.node` and `typescript` peer range compatible with the target, license, last publish, and open issues. Check the `@types/*` package matches the library's major version.
+- Read the exact versions with `npm view <package> version engines peerDependencies` and pin them. Commit the lockfile.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
 - TypeScript homepage, current release banner: https://www.typescriptlang.org/
+- npm registry: https://www.npmjs.com/
 - TypeScript 7.0 announcement: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/
 - TypeScript blog index (7.1 beta, 6.0 and 7.0 posts): https://devblogs.microsoft.com/typescript/
 - TypeScript 6.0 release notes: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html

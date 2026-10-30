@@ -125,6 +125,7 @@ Uma skill de linguagem fica em `skills/<linguagem>/SKILL.md`. O nome é em minú
    - O gate do `nodejs` (seção 8) tem seis passos.
    - Prettier e ESLint só rodam se o repositório os usa.
    - Rode cada comando e relate a saída real. Um gate que não rodou não é aprovação (seção 8, primeira linha).
+4a. **Registro de bibliotecas.** A skill tem uma seção `## Library registry` antes de `## Sources`. Ela dá o link oficial do registro da linguagem (pkg.go.dev, PyPI, npm, Maven Central, NuGet, crates.io ou pub.dev), diz como conferir versão e compatibilidade na página do registro, e aponta para `skills/migration-conduct/references/library-research.md`. O registro também entra em `## Sources`. `tests/check_rules.py` falha se a seção ou o link faltar.
 5. **Mecânica de teste.** A skill diz como rodar testes, criar duplos (objetos que imitam dependências) e carregar dados de teste na linguagem. `skills/tdd/SKILL.md` manda o agente buscar essa mecânica na skill de linguagem.
 6. **Duas verificações** antes de aceitar a skill:
    - **Formato.** O nome é igual à pasta. O frontmatter tem as chaves de uma skill de linguagem (`name`, `description` e `metadata`). O YAML é válido. Rode `claude plugin validate.claude --strict` e guarde a saída. O toolkit não tem gate próprio para o frontmatter (veja Pendências).

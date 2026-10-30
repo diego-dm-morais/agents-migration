@@ -124,9 +124,17 @@ Run each command, read its result, and report the real output. A gate that did n
 - `ZoneInfo` on Windows without `tzdata`.
 - `open()` without `encoding=` in code that runs on more than one Python version.
 
+## Library registry
+
+- Registry: https://pypi.org/ (project pages list the release history, `Requires-Python`, license and the wheel files).
+- Before adding a package, check the standard library first. Then search PyPI, open the project page, and confirm: latest release date, `Requires-Python` compatible with the target `pyproject.toml`, license, and maintainers.
+- Pin the exact version with the tool the repository already uses (section 2). Read the lockfile after adding.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
 - Python downloads, current stable release: https://www.python.org/downloads/
+- Python Package Index: https://pypi.org/
 - Devguide, version support phases: https://devguide.python.org/versions/
 - Built-in functions (round, bool, open): https://docs.python.org/3/library/functions.html
 - Built-in types (int, dict, str, bytes): https://docs.python.org/3/library/stdtypes.html

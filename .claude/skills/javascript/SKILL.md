@@ -142,8 +142,16 @@ Keep the gate commands in the repository's `package.json` `scripts`, so that a r
 - Code that depends on the order of two independent promise chains.
 - `JSON.stringify` of values with `undefined` fields, `NaN`, `Infinity` or `BigInt`, with no replacer and no test.
 
+## Library registry
+
+- Registry: https://www.npmjs.com/ (package pages show versions, `engines`, license, maintainers and last publish date).
+- Before adding a package, check the language and runtime built-ins first. Then search npm, open the package page, and confirm: latest version, `engines` compatible with the target runtime, license, last publish, and open issues. Browser-only or bundler-only packages need the same check against the target runtime.
+- Read the exact versions with `npm view <package> version engines` and pin them. Commit the lockfile.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
+- npm registry: https://www.npmjs.com/
 - ECMAScript 2026 (17th edition), publication page: https://ecma-international.org/publications-and-standards/standards/ecma-262/
 - ECMAScript 17th edition HTML: https://262.ecma-international.org/17.0/index.html (did not index in this run)
 - ECMAScript living draft (clauses 4.4.23, 7.1.14, 21.1.3.3, 21.3.2.29, 23.1.3.30, 27.5.1.8, 27.5.2.1): https://tc39.es/ecma262/. Clause numbers come from this draft; verify them against the 17th edition before a parity claim.

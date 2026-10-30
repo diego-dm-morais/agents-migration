@@ -144,8 +144,16 @@ The runs in this skill used Amazon Corretto 25.0.5, unless a line says "earlier 
 - A catch-all `catch (Exception e)` that hides a failure the source reports as a value.
 - Compiling sources with non-ASCII text without `-encoding`.
 
+## Library registry
+
+- Registry: Maven Central, https://central.sonatype.com/ (artifact pages show coordinates, versions, the POM and the required Java release).
+- Before adding an artifact, check the JDK standard library first. Then search Maven Central, open the artifact page, and confirm: latest version, the Java release it is compiled for (bytecode level) against the target, license, last release, and transitive dependencies.
+- Read the exact coordinates and versions from the artifact page and pin them in the build file already used by the repository (Maven or Gradle). Do not add a second build tool.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
+- Maven Central: https://central.sonatype.com/
 - Amazon Corretto download page, the standard (pt-BR): https://aws.amazon.com/pt/corretto/
 - Amazon Corretto FAQ, support calendar and LTS: https://aws.amazon.com/corretto/faqs/
 - Amazon Corretto 25 User Guide, "What is Amazon Corretto 25?": https://docs.aws.amazon.com/corretto/latest/corretto-25-ug/what-is-corretto-25.html

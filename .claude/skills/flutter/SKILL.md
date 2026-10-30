@@ -159,8 +159,16 @@ Run each command in the project root and report its real output. A gate that did
 - Assuming `List.sort` keeps equal elements in their input order: it is not guaranteed stable.
 - Relying on `Map` iteration order for output that the source sorts.
 
+## Library registry
+
+- Registry: pub.dev, https://pub.dev/ (package pages show versions, the SDK constraint, pub points, likes, license and the platform support).
+- Before adding a package, check the Dart and Flutter SDK first. Then search pub.dev, open the package page, and confirm: latest version, SDK constraint compatible with the target `environment.sdk`, supported platforms, license, last publish, and the score.
+- Pin the version in `pubspec.yaml` and commit `pubspec.lock`. Run `flutter pub add <package>` only with the repository's pinned Flutter version.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
+- pub.dev: https://pub.dev/
 - Flutter 3.47: https://docs.flutter.dev/release/whats-new and https://flutter.dev/blog/whats-new-in-flutter-3-47
 - Dart SDK and Dart 3.0: https://dart.dev/get-dart and https://dart.dev/resources/language/evolution
 - Dart language: https://dart.dev/language/built-in-types, https://dart.dev/language/operators, https://dart.dev/language/variables, https://dart.dev/language/error-handling, https://dart.dev/language/concurrency, https://dart.dev/null-safety, https://dart.dev/null-safety/understanding-null-safety

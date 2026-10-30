@@ -155,9 +155,17 @@ A file without a final newline fails `gofmt -l`. In the probe, `go mod tidy` rew
 - `%v` in `fmt.Errorf` where the error chain must be kept. Use `%w`.
 - A table-driven test that checks only the happy path of a rounding or parsing rule.
 
+## Library registry
+
+- Registry: https://pkg.go.dev/ (search and module pages; versions and `go` directive in each module's page).
+- Before adding a module, check the standard library first. Then search pkg.go.dev, open the module page, and confirm: latest version, `go` directive compatible with the target `go.mod`, license, last release, and the import path.
+- Confirm exact versions locally with `go list -m -versions <module>` and pin them with `go get <module>@<version>`. Read `go.sum` after adding.
+- Full procedure and evaluation checks: `.claude/skills/migration-conduct/references/library-research.md`.
+
 ## Sources
 
 - Go release history: https://go.dev/doc/devel/release
+- Go module registry: https://pkg.go.dev/
 - Go 1.22 release notes: https://go.dev/doc/go1.22
 - Go language specification: https://go.dev/ref/spec
 - Effective Go: https://go.dev/doc/effective_go
