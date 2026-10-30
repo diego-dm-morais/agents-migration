@@ -1,5 +1,2 @@
 # Pessoal: memoria do Claude deste projeto. Decisao de 2026-10-29: so a memoria fica fora do git.
 .claude/memory/
-
-# Pessoal: configuracao local do Claude Code deste projeto (nao versionar).
-.claude/settings.local.json
