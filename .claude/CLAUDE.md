@@ -7,8 +7,8 @@ This file takes precedence over `C:\Users\Administrator\.claude\CLAUDE.md` (glob
 At the first reply of each session in this project, before any other work:
 
 1. Read the status printed by the SessionStart hook in this context (configured in `.claude/settings.local.json`). If it is not in this context, run `sh .claude/skills/migrate/scripts/check.sh status` from the project root.
-2. A migration is in progress when the `project` line is not `MISSING` and at least one unit has a `doc` line other than `OK`. Then report each unit's state in a short list and wait for the user's instruction. Do not dispatch any stage on your own.
-3. Otherwise (`project MISSING`, `units NONE`, or every unit's `doc` is `OK`), ask the user in one message for:
+2. A migration is in progress when the `project` line is not `MISSING` and at least one unit has a `doc` line other than `OK`. Then do not run `gh-check`; report each unit's state in a short list and wait for the user's instruction. Do not dispatch any stage on your own.
+3. Otherwise (`project MISSING`, `units NONE`, or every unit's `doc` is `OK`), this is a first session with no migration in progress. Run the `gh-check` skill first; if `gh` is missing or not authenticated, alert the user in pt-BR with the fix it gives. Then read `.claude/skills/migrate/references/help.md` and show its content verbatim first (same output as `/migrate help`; the skill is user-invoked only, so print the file yourself instead of invoking it). Then ask the user in one message for:
    - the source repository (local path or URL);
    - the tag to migrate (or branch or commit);
    - the endpoint(s) to migrate.

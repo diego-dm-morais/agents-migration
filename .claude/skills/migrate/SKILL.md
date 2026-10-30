@@ -2,7 +2,7 @@
 name: migrate
 description: "Orchestrates a code migration between two languages, one unit at a time. Sets up the project (init), reports the state of every unit (status), answers pending decisions (ask), and runs a unit through extraction, spec, plan, tasks, build, review and documentation. Runs only when the user types /migrate."
 disable-model-invocation: true
-argument-hint: "[init | status | ask [unit] | <unit> [extract|spec|plan|tasks|build|review|doc]]"
+argument-hint: "[help | init | status | ask [unit] | <unit> [extract|spec|plan|tasks|build|review|doc]]"
 allowed-tools: "Bash(sh ${CLAUDE_SKILL_DIR}/scripts/check.sh *), Bash(git clone --no-checkout *), Bash(git -C * checkout --detach *), Bash(git -C * rev-parse HEAD)"
 ---
 
@@ -17,6 +17,7 @@ You do not write migration code, specs, plans, reviews or docs yourself. You run
 `$ARGUMENTS` decides the form:
 
 - empty, or `status`: report the state of every unit.
+- `help`: print `${CLAUDE_SKILL_DIR}/references/help.md` verbatim to the user and stop. Run no other step.
 - `init`: set up the project (`${CLAUDE_SKILL_DIR}/references/intake.md`).
 - `ask` or `ask <unit>`: answer pending decisions (`${CLAUDE_SKILL_DIR}/references/ask.md`).
 - `<unit>`: run the unit through the stages until it is READY, or until a stop.
