@@ -49,6 +49,8 @@ if (count == null) {
 ```
 
 - Widget state lives in a `State` object. Business logic lives in plain Dart classes that the widget calls (references/widgets-and-state.md).
+- Navigation (Navigator 1, Navigator 2 Router API, go_router), theming (`ThemeData`, `ColorScheme`) are in references/navigation-and-theming.md.
+- Text that the user reads (intl, ARB files, plurals), accessibility (`Semantics`) and native calls (`MethodChannel`, `EventChannel`) are in references/i18n-a11y-and-platform.md.
 - Pattern and record syntax is a Dart 3.0 feature. Keep the source shape of any value that crosses a boundary.
 
 ## 4. Errors, resources and exit
@@ -145,6 +147,7 @@ Run each command in the project root and report its real output. A gate that did
 
 - Read references/as-source.md for the places where Dart behavior hides: int width on the web, `toStringAsFixed`, `round` ties, DateTime local versus UTC, `late`, null in text, and BuildContext after `await`.
 - Read references/dart-language.md and references/widgets-and-state.md for the facts behind each trap.
+- For routes, back stacks and theme values, read references/navigation-and-theming.md. For translated text, semantics labels and platform channel names, read references/i18n-a11y-and-platform.md.
 - Cite the source with `path:line` for each rule, and check each Dart behavior it depends on against the official pages listed in references.
 
 ## 11. Anti-patterns
@@ -158,6 +161,9 @@ Run each command in the project root and report its real output. A gate that did
 - `DateTime.now()` inside logic that a test must control.
 - Assuming `List.sort` keeps equal elements in their input order: it is not guaranteed stable.
 - Relying on `Map` iteration order for output that the source sorts.
+- Concatenating translated fragments instead of using one message with placeholders.
+- A `MethodChannel` name or method string typed differently from the source; the mismatch fails only at runtime.
+- Navigating after `await` without a `mounted` or `context.mounted` check.
 
 ## Library registry
 
@@ -175,4 +181,6 @@ Run each command in the project root and report its real output. A gate that did
 - Dart libraries: https://api.dart.dev/stable/dart-core/ (num, double, int, String, DateTime, Null, List, Map), https://api.dart.dev/stable/dart-async/Future/wait.html, https://api.dart.dev/stable/dart-isolate/Isolate/run.html, https://api.dart.dev/stable/dart-io/exit.html, https://api.dart.dev/stable/dart-io/exitCode.html, https://api.dart.dev/stable/dart-convert/jsonEncode.html, https://api.dart.dev/stable/dart-convert/jsonDecode.html
 - Dart tools: https://dart.dev/tools/dart-format, https://dart.dev/tools/dart-analyze, https://dart.dev/tools/pub/pubspec, https://dart.dev/tools/linter-rules/use_build_context_synchronously
 - Flutter testing and API: https://docs.flutter.dev/testing/overview, https://docs.flutter.dev/cookbook/testing/unit/introduction, https://docs.flutter.dev/cookbook/testing/widget/introduction, https://docs.flutter.dev/cookbook/testing/unit/mocking, https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html, https://docs.flutter.dev/reference/flutter-cli
+- Navigation and theme: https://docs.flutter.dev/ui/navigation, https://docs.flutter.dev/ui/navigation/deep-linking, https://pub.dev/packages/go_router, https://api.flutter.dev/flutter/material/ThemeData-class.html, https://api.flutter.dev/flutter/material/ColorScheme-class.html, https://api.flutter.dev/flutter/material/MaterialApp-class.html
+- i18n, accessibility and platform: https://docs.flutter.dev/ui/internationalization, https://pub.dev/packages/intl, https://docs.flutter.dev/ui/accessibility-and-internationalization/accessibility, https://api.flutter.dev/flutter/widgets/Semantics-class.html, https://docs.flutter.dev/platform-integration/platform-channels, https://api.flutter.dev/flutter/services/MethodChannel-class.html, https://api.flutter.dev/flutter/services/EventChannel-class.html
 - Flutter widgets: https://api.flutter.dev/flutter/widgets/State-class.html, https://api.flutter.dev/flutter/widgets/State/mounted.html, https://api.flutter.dev/flutter/widgets/StatelessWidget-class.html, https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html, https://api.flutter.dev/flutter/widgets/BuildContext-class.html, https://api.flutter.dev/flutter/foundation/Key-class.html

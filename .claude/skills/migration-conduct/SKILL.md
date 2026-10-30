@@ -19,7 +19,8 @@ These rules apply to every migration agent. The agent's own prompt gives its rol
 7. No irrelevant questions. Never ask what the code answers, what the library answers, or what a default would settle without changing the result. Record the default with `blocking: no`.
 8. Every question states what you checked (paths, lines, URLs) and why the answer is not there.
 9. An unanswered blocking question stops the unit with `NEEDS: user: <question, quoted>`. Never pick the behavior yourself.
-10. Legacy fidelity. Never ask the user a question that the legacy code can answer. Before any clarification, investigate the legacy code and identify its behavior, business rules and implemented decisions. The legacy code is the source of truth: preserve its behavior, business rules and decisions, even when they do not follow best practices or the recommended patterns of the target language. Do not change legacy behavior to fit best practices on your own initiative; functional fidelity to the original system comes first. Record in an ADR (Architecture Decision Record) every legacy decision that contradicts best practices and must be preserved: the decision, the reason to keep the original behavior, the best practices it contradicts, and the justification for keeping that implementation in the migration. Every agent applies this rule consistently in analysis, planning, implementation, testing and validation. Section 13 defines the records.
+10. No creativity in the target. Agents do not invent behavior, business rules, fields, states, routes, events, strings, layouts or design choices that the legacy code does not implement. Every UI state, event, navigation target and text comes from the legacy code at the pin, with `path:line @sha7`. A gap (something the legacy does not show) becomes a `Gaps` entry (extraction) or a PEND with `blocking: yes`; it is never filled by assumption. Framework or design patterns are used only where they reproduce what the legacy does.
+11. Legacy fidelity. Never ask the user a question that the legacy code can answer. Before any clarification, investigate the legacy code and identify its behavior, business rules and implemented decisions. The legacy code is the source of truth: preserve its behavior, business rules and decisions, even when they do not follow best practices or the recommended patterns of the target language. Do not change legacy behavior to fit best practices on your own initiative; functional fidelity to the original system comes first. Record in an ADR (Architecture Decision Record) every legacy decision that contradicts best practices and must be preserved: the decision, the reason to keep the original behavior, the best practices it contradicts, and the justification for keeping that implementation in the migration. Every agent applies this rule consistently in analysis, planning, implementation, testing and validation. Section 13 defines the records.
 
 ## 1. Goal: behavioral parity
 
@@ -56,6 +57,22 @@ Claim parity only with evidence from the current run (section 3). Otherwise say 
 | L3 | Differential run: source and target run on the same inputs and results are compared | parity claim |
 
 Report the highest level reached for each unit. L1 written by the agent that also wrote the target code does not prove parity by itself.
+
+### UI equivalents (screens, forms and flows)
+
+Applies to a unit whose source or target is a screen, a page, a component or a flow. The backend levels above keep their meaning; for UI the levels read as follows.
+
+| Level | UI evidence | Use |
+|---|---|---|
+| L0 | Source `path:line`, read in this run, plus the screen's state and route definitions | every extracted screen rule |
+| L1 | Derived state cases: each state, each event and each navigation edge of the screen has a test input (unit tests on the view model or state object, and on the navigation calls) | tests of the target |
+| L2 | Screenshot or golden-image comparison: the source screen rendered at a fixed size, locale, text scale and theme, compared with the target at the same settings. Pixel tolerance is recorded in the test | visual parity of one state |
+| L3 | Trace comparison: the source and the target run the same scripted user session, and the ordered trace of state changes, emitted events and navigation calls is compared | parity claim for a flow |
+
+- Record for each L2 image: the renderer or browser, the platform, the size, the locale, the text scale, the theme, and the tolerance. A screenshot without these settings is not evidence.
+- Record for each L3 trace: the script of user actions, the source trace and the target trace, and the first line where they differ. A trace compares only the events the source makes observable.
+- A screen's visual difference that the platform forces is a `deviation` with the platform's documented reason and its URL.
+- The highest UI level reached is reported in the same way as the backend levels (section 3).
 
 ## 4. Gaps and conflicts
 

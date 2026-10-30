@@ -6,7 +6,7 @@ Esta seção explica o que é o toolkit e como ele funciona por dentro. Leia pri
 
 O toolkit é um conjunto de **agentes** (assistentes de IA, cada um com uma tarefa fixa), **skills** (instruções reutilizáveis) e um script de verificação. Tudo fica na pasta `.claude/` do projeto. Com ele, o Claude Code migra código de uma linguagem para outra, uma **unidade** por vez.
 
-Uma unidade é a menor parte do sistema que funciona sozinha, como um endpoint da API. Cada unidade passa por sete etapas, nesta ordem:
+Uma unidade é a menor parte do sistema que funciona sozinha, como um endpoint da API (backend), ou uma tela ou funcionalidade de frontend web ou mobile. Cada unidade passa por sete etapas, nesta ordem:
 
 ```mermaid
 flowchart LR

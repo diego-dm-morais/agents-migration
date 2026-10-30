@@ -74,6 +74,41 @@ Each entry gives the question to ask in the source, the test that pins the behav
 - Pin: the same inputs under two locales that format differently (decimal separator, date order), compared with the source output under its fixed locale (L2).
 - Parity: the locale is an explicit input or a fixed setting, never the machine default. Formats and collation match the source's locale.
 
+### State and lifecycle on screens
+- Ask: grep component mount and unmount hooks, dispose or destroy calls, lifecycle callbacks, local state that outlives its screen, global or shared state read by a screen, initial-value code that runs on each render or each visit.
+- Pin: each state transition the source allows (loading, empty, error, loaded, editing), one case per transition, and a case where the user leaves the screen during a pending action (L1; L3 for a parity claim on the visible result).
+- Parity: the same state after each user event and each lifecycle event; the same initial value on first visit and on a return visit; no state kept after the screen is gone unless the source keeps it.
+
+### Async races on screens
+- Ask: grep requests started from UI events, awaited calls that update state, debounced or throttled inputs, retries, polling, subscriptions, and any code that writes state after an await.
+- Pin: two requests for the same screen where the second returns first; a response that arrives after the screen is gone; a response that arrives after a newer user input (L1, with a fake that controls the order of responses).
+- Parity: the same final visible value as the source in each order. Stale responses are dropped or applied exactly as the source does. A write to state after dispose or unmount is an error in most frameworks: the target skips it, and the skip must match the source's observable output (for example, no navigation after the user left).
+
+### Navigation and back stack
+- Ask: grep push, pop, replace, clear-stack and redirect calls; deep link handlers; the action that a back gesture or a back button triggers; route guards; the screen that opens after a success or failure.
+- Pin: the stack depth and the top screen after each action, from a cold start and from a deep link; the back action on the first screen (L1; L3 for the visible flow).
+- Parity: the same screens in the same order, the same parameters on each screen, the same result when the user goes back with unsaved input. A deep link to a screen that needs data must follow the source's fallback.
+
+### Focus and keyboard
+- Ask: grep focus requests, input field order, submit actions, keyboard types, auto-focus on open, scroll-to-field on error, shortcuts and key handlers.
+- Pin: tab or next-field order for each form; the submit action with an empty and a filled form; the focus after a validation error (L1 for order; L3 for the visible focus).
+- Parity: the same focus order and the same field that receives focus after an error. A key that submits in the source submits in the target; a key the source ignores stays ignored.
+
+### Text layout and overflow
+- Ask: grep fixed widths and heights, truncation, ellipsis, line limits, text that is measured or sized in code, text built from pieces, and labels placed beside icons.
+- Pin: the longest value the source accepts, a value with no spaces, a value in the script the product supports (for example a multi-byte or right-to-left string), at the largest text scale the platform offers (L2 for the visible text).
+- Parity: the same truncation point and the same line count for the same input, or a recorded `deviation` when a platform forces a different wrap. A label that the source truncates is not extended by the target.
+
+### Time zones in displayed dates
+- Ask: grep date formatting in views or templates, the zone used to display, relative dates ("today", "yesterday"), ranges that cross midnight, and the zone of the server versus the device.
+- Pin: the same instant displayed in the source's zone, a value at midnight in that zone, and a value on a daylight saving change day (L2 for the displayed text).
+- Parity: the zone is the source's fixed zone or the user's zone exactly as the source sets it, never the machine's default by accident. "Today" is computed in the zone the source uses.
+
+### Platform differences
+- Ask: grep platform checks (OS name, device form, web versus native), platform-specific files or styles, back button handling, safe-area or inset code, default fonts and default controls, permissions prompts.
+- Pin: each branch of a platform check with a test for each platform the source supports; the default control or font on each platform, compared with the source's recorded output (L2 for screens).
+- Parity: the same behavior on each platform the source supports. A difference the platform forces is recorded as `deviation` with the platform's documented reason and its URL, and it is never silent.
+
 ## 2. Migration shapes
 
 Pick the shape per unit in the `Target design` section of plan.md. The parity evidence is the same in every shape.

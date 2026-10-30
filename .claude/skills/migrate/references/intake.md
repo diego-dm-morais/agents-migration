@@ -8,7 +8,10 @@ Read this for `/migrate init`, and when a new source or unit must be registered.
 
 1. Source: language, version, repository (local path or URL), ref (tag, branch or commit), source root inside the repository (default `.`).
 2. Target: language, version, target root (default `.`), and the directory for the generated docs (default `docs`).
-3. Unit kind: function, class, module, HTTP operation, CLI command, job, or screen. One kind per migration.
+3. Unit platform and kind. Platform: `backend`, `web` or `mobile`. One platform per migration; a migration may list units of other platforms only as separate migrations. Kind by platform:
+   - `backend`: function, class, module, HTTP operation, CLI command or job (`unit_kind` value: `endpoint` for HTTP operation, `feature` for the others).
+   - `web` or `mobile`: screen or feature (`unit_kind: screen` or `feature`).
+   Write `unit_platform` and `unit_kind` in MIGRATION.md.
 4. Languages of the artifacts and of the docs (default: the language the user writes in).
 5. Deadline, optional: ask once, with the options "No deadline (Recommended)" and "Enter a date". Write `deadline: none` for no deadline, or `deadline: YYYY-MM-DD` for a date. The default never blocks a unit. A deadline sets the order of the work and what fits in it. It never changes legacy behavior or skips a test (`migration-conduct` section 4).
 
@@ -32,7 +35,7 @@ Never run a mutating git command in the source repository, and never write insid
 
 ## Backlog
 
-Dispatch behavior-extractor in mode `survey` with the source root and the unit kind. It returns candidate units with their entry points and dependencies. Show the list to the user with AskUserQuestion, and write the confirmed units under `## Backlog` in MIGRATION.md, each with its `depends:` from the survey. For a new architecture, then run `/migrate architecture` before the first unit. Unit ids come from the operation or symbol name, in lowercase kebab-case.
+Dispatch behavior-extractor in mode `survey` with the source root, `unit_platform` and `unit_kind`. It returns candidate units with their entry points and dependencies. For `web` or `mobile`, the survey finds routes, navigators, screen or page components and feature folders. Show the list to the user with AskUserQuestion, and write the confirmed units under `## Backlog` in MIGRATION.md, each with its `depends:` from the survey. For a new architecture, then run `/migrate architecture` before the first unit. Unit ids come from the operation, screen or symbol name, in lowercase kebab-case. Screen ids use `<area>-<screen>` (for example `checkout-payment`).
 
 ## Secrets in input
 

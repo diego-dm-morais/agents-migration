@@ -36,6 +36,13 @@ The dispatch prompt gives the unit id. Read `docs/migration/MIGRATION.md` (`targ
 8. Write `docs/migration/<unit>/tasks.md` with the template. Frontmatter: `status: draft`; `upstream_spec` and `upstream_plan` are the values that `sh .claude/skills/migrate/scripts/check.sh hash <file>` prints. Every task: `status: pending`, empty `evidence:`.
 9. Verify: run `sh .claude/skills/migrate/scripts/check.sh status <unit>` and `sh .claude/skills/migrate/scripts/check.sh ids <unit>`. Fix every INVALID for tasks (bad kind or status, unknown dependency, duplicate id, uncovered FR). Set `status: ok` only when every criterion of the tasks stage holds. Otherwise keep `draft`.
 
+## UI units (platform web or mobile)
+
+Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
+
+- A `capture` task for a UI unit records, in addition to the golden output: screenshots of each state the spec lists (loading, empty, error, populated), saved under `target_root` in the files the task lists; or an interaction script (ordered events and the expected visible state after each), with the source command or tool the plan names. Both come from the source run at the pinned commit, never from a remembered design.
+- A UI `test` task checks an observable state after an event, using the spec's acceptance wording. Screenshot comparison is a separate `verify` step only when the spec or plan names it.
+
 ## Rules
 
 - Decompose only. Never write code, tests, fixtures or captures, and never run a task's validation.

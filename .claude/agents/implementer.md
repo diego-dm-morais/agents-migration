@@ -40,6 +40,16 @@ Fix mode (the dispatch names `review.md` and the open RV ids):
 3. Run the validation of each task whose files changed, and write the new result in its `evidence:`. Name each RV id as `fixed`, or as `blocked` with its reason, in `Open:`.
 4. Run `status <unit>`. The review becomes STALE after a fix; that is expected.
 
+## UI units (platform web or mobile)
+
+Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
+
+- Component or widget tests render the unit in isolation. The router is mocked: a navigation is asserted as a call with its target and params, never performed.
+- Time is faked (fake timers, a fixed clock) for every debounce, animation, timeout and polling. A test never waits on real time.
+- Locale is fixed in each test (the locale the source test or the spec names). Strings are asserted by key or by the literal the source has.
+- The viewport is fixed in each test that depends on layout or breakpoints (width and height the plan names). Platform APIs (camera, location, storage, `Platform`) are replaced by fakes.
+- A UI test never reaches a real backend, a real browser storage shared between tests, or a real device.
+
 ## Rules
 
 - Write code and tests only in `target_root`, in the files that a task lists in `files:`. In `tasks.md`, change only the `status:` and `evidence:` lines. Never edit `spec.md`, `plan.md`, `extraction.md`, `review.md` or any doc.

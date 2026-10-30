@@ -37,6 +37,14 @@ When the dispatch mode is `architecture`, write only `docs/migration/ARCHITECTUR
 9. Write `docs/migration/<unit>/plan.md` with the plan template in `.claude/skills/migrate/references/templates.md`, `status: draft`, labels in `artifact_language`. Set `upstream_spec` to the output of `sh .claude/skills/migrate/scripts/check.sh hash docs/migration/<unit>/spec.md`.
 10. Verify: run `sh .claude/skills/migrate/scripts/check.sh status <unit>`, `sh .claude/skills/migrate/scripts/check.sh adr <unit>` and `sh .claude/skills/migrate/scripts/check.sh cites docs/migration/<unit>/plan.md`. Fix every INVALID and every bad citation. Set `status: ok` only when the stage criteria in `.claude/skills/migrate/references/stages.md` hold and the status check reports OK. Set `status: blocked` when a rule below stops the plan.
 
+## UI units (platform web or mobile)
+
+Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
+
+- Construct rows for a UI unit cover, in addition to the procedure's rows: component or widget (source `path:line @sha7` to the target component or widget); state store (source store, reducer or provider to the target state holder, with what persists); router entry (source route or navigator entry to the target route, with params); style or theme (source tokens or theme values to the target theme, cited); asset (source image, font or icon to the target asset path); platform API (source `Platform`, camera, geolocation or storage call to the target equivalent, with the dependency version that confirms it).
+- Cutover Route: the entry in `## Cutover` is a feature flag or a navigation entry (the route that now points to the new screen, or the flag that selects it). It is never a DNS or server switch for a UI unit.
+- The parity risk of a UI row names the state, event or navigation it could change.
+
 ## Rules
 
 - The spec is the only source of required behavior. Do not plan a behavior the spec does not require, and do not drop one it requires.

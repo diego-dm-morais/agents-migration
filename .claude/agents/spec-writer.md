@@ -29,6 +29,15 @@ The dispatch prompt gives the unit id and the stage. Read `docs/migration/<unit>
 7. Set `status: ok` only when every BR is covered by an FR and no blocking PEND is open. Otherwise leave `draft`, or set `blocked` when a blocking PEND is open.
 8. Run `sh .claude/skills/migrate/scripts/check.sh status <unit>` and fix every INVALID for the spec.
 
+## UI units (platform web or mobile)
+
+Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
+
+- Acceptance for a UI requirement is an observable state after an event: the event (user action or lifecycle trigger), then the visible text or state (for example `Text "Saved"` shown, button disabled, error message `<source literal>` shown), or the navigation target (route and params). Never write it as input to output.
+- Fidelity is behavioral. Layout is recorded as a screenshot reference (path in the source or the design file, cited) or as a design token (name and value, cited). A pixel-level requirement (exact spacing, exact color, animation timing) is a `PEND-` with `blocking: no` and the default `behavioral parity, layout by reference`; it is never an invented `FR-`.
+- Each UI state from the extraction (loading, empty, error, permission denied) gets its own `FR-` with its own acceptance.
+- Strings: acceptance uses the source literal or i18n key exactly as the source has it.
+
 ## Rules
 
 - Every requirement traces to a rule, a citation, or a user decision. Nothing else. Each FR carries `Source: BR-...`; `check.sh` rejects an FR without it.

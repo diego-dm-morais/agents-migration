@@ -19,7 +19,8 @@ target_language:
 target_version:
 target_root: .
 doc_root: docs
-unit_kind:
+unit_platform: backend | web | mobile
+unit_kind: endpoint | feature | screen
 artifact_language:
 doc_language:
 limit_dispatch: 2
@@ -41,7 +42,7 @@ deadline: none
 (Only requirements the user states. The source's own limits are facts in the extraction, not NFRs.)
 
 ## Backlog
-1. <unit-id> | <kind> | <entry point> | depends: none | service: <target service from ARCHITECTURE.md, or none>
+1. <unit-id> | <platform> | <kind> | <entry point> | depends: none | service: <target service from ARCHITECTURE.md, or none>
 ```
 
 ## docs/migration/ARCHITECTURE.md
@@ -132,7 +133,7 @@ source_sha: <source_sha of MIGRATION.md at extraction time>
 - [ ] every entry point traced
 - [ ] every unresolved symbol resolved or listed under Gaps
 - [ ] `check.sh symbols` reviewed: every listed symbol fixed or explained
-- [ ] every response path mapped (success, each error, each exception)
+- [ ] every response path mapped (success, each error, each exception) — backend; for `web` or `mobile`, every UI state mapped instead (loading, empty, each error, success) with its route or screen transition
 - [ ] every cited line reopened in this run
 - [ ] every rule has evidence
 - [ ] every legacy decision listed under `## Legacy decisions contrary to best practice`, with its evidence, or `none found` with the search that was run

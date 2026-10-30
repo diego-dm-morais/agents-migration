@@ -276,6 +276,23 @@ frs_without_source() {
     END { flush() }'
 }
 
+# unit_platform: the unit_platform key of MIGRATION.md frontmatter (backend | web | mobile); "backend" when absent
+unit_platform() {
+  p=$(fm "$MIG" unit_platform)
+  printf '%s' "${p:-backend}"
+}
+
+# platform_sections_bad <doc>: " sec-<name>-absent" tokens for the sections a web or mobile unit doc needs
+platform_sections_bad() {
+  h=$(tr -d '\r' < "$1")
+  printf '%s\n' "$h" | grep -qxF '## Route and params' \
+    || printf '%s\n' "$h" | grep -qxF '## Screen' \
+    || printf ' sec-route-or-screen-absent'
+  for s in 'UI states' 'Interactions and events' 'Navigation in and out' 'Strings and i18n' 'Accessibility'; do
+    printf '%s\n' "$h" | grep -qxF "## $s" || printf ' sec-%s-absent' "$(printf '%s' "$s" | tr ' ' '_')"
+  done
+}
+
 # deadline_line: the project deadline. "none" when MIGRATION.md sets no date; a date gives the
 # days left, negative and marked OVERDUE once it has passed. CHECK_TODAY (YYYY-MM-DD) replaces
 # today's date; the tests use it.
@@ -451,6 +468,11 @@ doc_line() {
     [ "$rec" = "$(bhash "$af")" ] || stale="$stale source:$aid"
   done
   [ "$(fm "$f" scope_hash)" = "$(scope_hash "$u")" ] || stale="$stale scope_hash"
+  case "$(unit_platform)" in
+    backend) ;;
+    web|mobile) bad="$bad$(platform_sections_bad "$f")" ;;
+    *) bad="$bad platform-invalid" ;;
+  esac
   if [ -n "$bad" ]; then line "$u" doc INVALID "$bad"; return; fi
   if [ -n "$stale" ]; then line "$u" doc STALE "$stale"; return; fi
   case "$st" in ok) rs=OK ;; draft) rs=DRAFT ;; esac
@@ -471,7 +493,7 @@ unit_report() {
   for r in "$o_ex" "$o_sp" "$o_pl" "$o_tk"; do
     printf '%s\n' "$r" | awk '{ exit ($3 == "OK" ? 0 : 1) }' || ready=NO
   done
-  echo "$u ready $ready"
+  echo "$u ready $ready platform=$(unit_platform)"
 }
 
 ids_report() {
@@ -558,6 +580,9 @@ usage() {
 [ $# -ge 1 ] || usage
 cmd=$1; shift
 case "$cmd" in
+  help|-h|--help)
+    echo "usage: sh check.sh status [unit] | pin | deadline | cites <file> | symbols <file> | env | ids [unit] | adr [unit] | hash <file> | scope <unit>"
+    exit 0 ;;
   status)
     if [ ! -f "$MIG" ]; then echo "project MISSING $MIG"; exit 0; fi
     pin_line

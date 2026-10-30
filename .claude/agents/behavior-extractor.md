@@ -35,6 +35,15 @@ The dispatch prompt gives the unit id, the unit kind, the entry point if known, 
 
 Read no more than the entry points needed to list candidates. Return, in your final message, a list of candidate units: id, kind, entry point (`path:line @sha7`), direct dependencies. Write no file.
 
+## UI units (platform web or mobile)
+
+Read `unit_platform` and `unit_kind` from the unit's frontmatter in `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
+
+- Survey mode: list candidates from routes (router config, `app/` or `pages/` trees, navigators), screen and page components (`*Screen`, `*Page`, `*_screen.dart`, `*_page.dart`) and feature folders. Each candidate gets its kind (`screen` or `feature`), its route or screen name, and its entry point as `path:line @sha7`.
+- Trace, in order, for the unit's entry point: route entry and params (names, types, defaults, how they are read); lifecycle (mount, init, dispose, focus or resume hooks); state management (stores, reducers, providers, signals, local state, what persists); events (taps, submits, changes, gestures) and their handlers; validation (field rules, messages); API calls (endpoint, method, when fired, what happens on each result); navigation in and out (targets, params passed, back behavior); loading, empty and error states, each as its own rule; permissions (camera, location, auth guards, role checks); i18n strings (keys and literal text, cited); platform branches (`Platform`, `kIsWeb`, `isIOS`, media queries, `process.env` build flags).
+- A UI state, event or navigation target is a `BR-` like any other: it needs a `path:line @sha7` citation and an evidence line. A visual value (color, spacing, font) is recorded as a token with its citation, not as a rule.
+- Layout you cannot trace to code is a gap. Do not describe pixels from memory.
+
 ## Rules
 
 - The implemented code is the only source of behavior. Document it as it is, bugs included. Never reinterpret it to look like a best practice.

@@ -45,6 +45,20 @@ Order of sections, after `# <unit-id>` and the Sources table. Name each heading 
 - Gaps: `Not determinable from the code: <what was searched>` and `Required by context, not in the code: <id>`.
 - Glossary: each term a reader may not know. A code term cites `path:line`; a context term cites `Context: <id>`.
 
+## UI units (platform web or mobile)
+
+Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
+
+For `web` or `mobile`, the sections above replace Entry points, Inputs, Outputs, Errors, Rules, Flow and Side effects with these, in `doc_language`, in this order after Summary:
+- Route and params: `| Route or screen | Param | Type | Required | Default | Evidence |`
+- UI states: `| State | Trigger | What the user sees | Evidence |` (loading, empty, error, populated, permission denied, each one)
+- Interactions and events: `| Event | Handler | Effect | Evidence |`
+- Navigation in and out: `| Direction | Target | Params | Evidence |`
+- Strings and i18n: `| Key or literal | Locale file or source | Evidence |`
+- Accessibility: `| Element | Role or label | Focus or keyboard behavior | Evidence |`
+
+Keep Known issues and deviations, Legacy decisions, Context, Gaps and Glossary as above. Backend units keep the backend sections unchanged. Cite each UI statement as usual; a visual value is cited as a token, not described from memory.
+
 ## Rules
 
 - The implemented target code is the only source of behavior. Spec, extraction, plan and review are context and never add a behavior.

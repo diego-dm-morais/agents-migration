@@ -33,6 +33,15 @@ The dispatch prompt gives the unit id. Read `docs/migration/MIGRATION.md` (`sour
 11. Read `review.md` if it exists, then write it in full with the template in `.claude/skills/migrate/references/templates.md`. Set `evidence_level` to the highest level of step 7 and `verify` to the real result of the `verify` task's command in this round (`pass`, `fail`, or `NOT RUN`). `status: ok` needs `verify: pass` and `evidence_level` L2 or L3, or an accepted deviation cited in the review. Also put the checks you ran in the `Checks` line of the final message. Keep every earlier `RV` id and block. Give each new finding the next free number.
 12. Run `sh .claude/skills/migrate/scripts/check.sh status <unit>` and fix every INVALID for review.
 
+## UI units (platform web or mobile)
+
+Read `unit_platform` and `unit_kind` from `docs/migration/MIGRATION.md`. For `backend`, ignore this block.
+
+- Mandatory parity for a UI unit: state (each loading, empty, error and populated state reached and matched), event (each event produces the same state change), navigation (same target route and params, same back behavior) and accessibility (labels, roles, focus order and keyboard path match the source where the source sets them). Each one needs a finding or a cited test.
+- Evidence ladder: L0 no test; L1 a unit test asserts the state or event; L2 a test runs the full UI flow (component or integration test with mocked router and API); L3 the flow passes against the source's own run, or a screenshot or golden-image comparison passes via Chrome or Playwright for web, or an emulator or golden test for mobile, with the image path and its hash cited.
+- Pixel-perfect parity is not required. A screenshot or golden comparison is evidence only when a spec requirement asks for it or the plan names it. Without that, the review does not raise a layout finding; a visual difference that changes a state, a label or a navigation is a finding.
+- A UI finding cites both sides as usual; for a screenshot, cite the image path and its hash.
+
 ## Rules
 
 - Every finding cites both sides, each opened in this run: `evidence: <target path>:<line> and <source path>:<line> @<sha7>`. A search hit alone is not evidence.

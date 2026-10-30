@@ -33,8 +33,11 @@ Texto exibido por `/migrate help` e na primeira resposta de uma sessão sem migr
 
 ## Como informar as unidades
 
-- Direto: método e caminho da operação, por exemplo `POST /v1/users`. O id da unidade vira `post-v1-users`. O Eduardo acha a rota e o handler no código da origem.
-- Por collection: export do Postman, OpenAPI ou Apidog. A collection só lista as operações e os nomes. Os exemplos dela nunca são fonte de comportamento (o código no pin é). Tokens e credenciais viram `<redacted>`.
+Cada unidade tem uma plataforma: `backend`, `web` ou `mobile`.
+
+- Backend, direto: método e caminho da operação, por exemplo `POST /v1/users`. O id da unidade vira `post-v1-users`. O Eduardo acha a rota e o handler no código da origem.
+- Web ou mobile, direto: a rota ou o arquivo da tela, por exemplo `src/app/checkout/payment/page.tsx` ou `lib/screens/checkout_payment.dart`. O id vira `checkout-payment`. O Eduardo acha a tela, o roteador e os estados no código da origem.
+- Por collection ou design: export do Postman, OpenAPI ou Apidog (backend), ou Figma e storyboard (frontend). Serve só para listar operações, telas e nomes. Os exemplos nunca são fonte de comportamento (o código no pin é). Tokens e credenciais viram `<redacted>`.
 
 ## Estados de cada etapa
 
