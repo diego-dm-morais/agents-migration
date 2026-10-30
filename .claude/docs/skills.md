@@ -1,11 +1,13 @@
 # Skills
 
-Este documento descreve as skills do toolkit de migração: o que cada uma faz, quem a carrega e como ela é acionada.
+Este documento mostra as skills do toolkit de migração: o que cada uma faz, quem a carrega e como ela é acionada.
 
-Termos usados aqui:
+Uma **skill** é um conjunto de instruções que o Claude Code carrega quando precisa delas. Você não precisa decorar as skills. Este guia serve para entender por que cada agente se comporta do jeito que se comporta.
+
+## Termos usados aqui
 
 - **Skill:** pasta com um arquivo `SKILL.md`, com instruções que o Claude Code carrega sob demanda.
-- **Frontmatter:** o bloco entre as duas linhas `---` no início de cada arquivo `SKILL.md` ou de cada agente.
+- **Frontmatter:** o bloco entre as duas linhas `---` no início de cada arquivo `SKILL.md` ou de cada agente. É onde ficam as configurações, como o nome e a descrição.
 - **Baseline:** a versão de uma linguagem que a skill toma como referência.
 - **Gate:** o conjunto de comandos de qualidade que o código precisa passar.
 
@@ -13,7 +15,7 @@ Os caminhos são relativos a `.claude/`.
 
 ## Skills de fluxo e de conduta
 
-O toolkit tem cinco skills que não são de linguagem. A tabela mostra o papel de cada uma e quem a carrega.
+O toolkit tem cinco skills que não são de linguagem. Elas organizam o trabalho, e não ensinam uma linguagem. A tabela mostra o papel de cada uma e quem a carrega.
 
 | Skill | Papel | Carregada por | Acionamento |
 |---|---|---|---|
@@ -23,9 +25,9 @@ O toolkit tem cinco skills que não são de linguagem. A tabela mostra o papel d
 | `tdd` | Método test-first do implementer: vermelho, verde e refatoração; nomes de teste com o id da spec; testes de caracterização; isolamento de dependências externas; gate de cobertura. | `task-decomposer` e `implementer`. | Pré-carregada. `user-invocable: false` (`skills/tdd/SKILL.md`). |
 | `doc-writing` | Processo de escrita da documentação de uma unidade: coleta de contexto, redação seção por seção e autoteste do leitor. | `doc-writer`. | Pré-carregada. `user-invocable: false` (`skills/doc-writing/SKILL.md`). |
 
-**Formas do comando `/migrate`**
+### Formas do comando `/migrate`
 
-`skills/migrate/SKILL.md`, define as formas de uso:
+Estas formas estão definidas em `skills/migrate/SKILL.md`:
 
 - `/migrate` ou `/migrate status`: mostra o estado de cada unidade.
 - `/migrate init`: prepara o projeto.
@@ -33,11 +35,11 @@ O toolkit tem cinco skills que não são de linguagem. A tabela mostra o papel d
 - `/migrate <unit>`: leva a unidade pelas etapas até `READY` ou até uma parada.
 - `/migrate <unit> <stage>`: roda só uma etapa, depois que as etapas anteriores estiverem `OK`.
 
-Os agentes são despachados pelo `/migrate`. Chamada direta só quando o usuário pede pelo nome ou pelo apelido (`CLAUDE.md`).
+Os agentes são despachados pelo `/migrate`. Chame um agente direto só quando o usuário pedir pelo nome ou pelo apelido (`CLAUDE.md`).
 
-**As dez regras obrigatórias**
+### As dez regras obrigatórias
 
-As regras estão em `skills/migration-conduct/SKILL.md`, seção 0. Este é o resumo, com os mesmos números:
+As regras estão em `skills/migration-conduct/SKILL.md`, seção 0. Elas são o coração do toolkit. Este é o resumo, com os mesmos números:
 
 1. **Sem alucinação.** Toda afirmação sobre o comportamento cita `path:line @sha7`, aberto nesta execução.
 2. **Sem regra de negócio inventada.** Um `BR-` sem citação, ou um `FR-` sem `Source: BR-`, é defeito.
@@ -54,7 +56,7 @@ A seção 13 da conduta define as decisões legadas: `DEC-NNN` na extração e `
 
 ## Skills de linguagem
 
-O toolkit tem nove skills de linguagem. Cada uma descreve a prática de uma linguagem, com as armadilhas que uma migração encontra e o gate de qualidade. `CLAUDE.md`, lista as nove.
+O toolkit tem nove skills de linguagem. Cada uma descreve a prática de uma linguagem, com as armadilhas que uma migração encontra e o gate de qualidade. `CLAUDE.md` lista as nove.
 
 | Skill | Baseline (`metadata.baseline`) | Verificada em (`metadata.verified`) | Escopo |
 |---|---|---|---|
@@ -64,30 +66,40 @@ O toolkit tem nove skills de linguagem. Cada uma descreve a prática de uma ling
 | `nodejs` | `Node.js 22 LTS (v22.23.x docs)` | 2026-10-29 | Código Node.js 22 ou superior (LTS) que roda em Node: ESM e CommonJS, `node:test`, fetch e AbortSignal, erros e códigos de saída, paridade numérica e gate de qualidade. |
 | `typescript` | `TypeScript 7.0 (7.0.2 on npm latest, checked 2026-10-29)` | 2026-10-29 | Código TypeScript 7.0 ou superior em `.ts` e `.tsx`: tsconfig e strict mode, tipos estruturais, narrowing, enums, any e unknown, entrada JSON, números e datas, gates de tsc e de testes, e migrações de e para TypeScript. |
 | `javascript` | `ECMAScript 2026 (17th edition, June 2026), as run by current browsers and Node.js 26 LTS; language only` | 2026-10-29 | A linguagem JavaScript em `.js` e `.mjs`: igualdade fraca, NaN e -0, números IEEE-754, arredondamento de toFixed e Math.round, strings UTF-16, meses de Date a partir de zero, ordenação padrão e ordem de promises e async. APIs de runtime ficam na skill `nodejs` (`skills/javascript/SKILL.md`). |
-| `dotnet` | `C# 14 on.NET 10 LTS` | 2026-10-29 | Código C# 14 em.NET 10 LTS: regras da linguagem, overflow de inteiros, tipos de referência anuláveis, decimal e Math.Round, DateTime Kind, strings sensíveis à cultura, ordem do Dictionary, gate de build, teste e formatação, e migrações de e para C#. |
+| `dotnet` | `C# 14 on .NET 10 LTS` | 2026-10-29 | Código C# 14 em .NET 10 LTS: regras da linguagem, overflow de inteiros, tipos de referência anuláveis, decimal e Math.Round, DateTime Kind, strings sensíveis à cultura, ordem do Dictionary, gate de build, teste e formatação, e migrações de e para C#. |
 | `rust` | `Rust 1.99.1 stable, edition 2024 (Rust 1.85 or later)` | 2026-10-29 | Código Rust 1.85 ou superior (estável 1.99.1, edição 2024) para crates Cargo, ownership, Result e panics, aritmética de inteiros e f64, coleções, threads, gates de cargo test, clippy e rustfmt, e migrações de e para Rust. |
 | `flutter` | `Flutter 3.47 stable, Dart 3.x (Dart docs reflect 3.13.3)` | 2026-10-29 | Código Dart e Flutter (Flutter 3.47 estável, Dart 3.x): null safety e late, int e double na VM e na web, DateTime e UTC, async e isolates, widgets e State, gates de flutter test, dart format e dart analyze, e migrações de e para Dart ou Flutter. |
 
 Os valores da coluna de baseline são copiados de `metadata.baseline` de cada `SKILL.md`. A data vem de `metadata.verified`.
 
-Nenhum agente lista uma skill de linguagem no campo `skills:` do frontmatter. Essas skills carregam pela regra de descrição, descrita na seção seguinte.
+Nenhum agente lista uma skill de linguagem no campo `skills:` do frontmatter. Essas skills carregam pela regra de descrição, descrita na próxima seção.
 
 ## Como uma skill é acionada
 
-São quatro regras. Os caminhos citados estão no próprio toolkit.
+Uma skill pode ser carregada de três jeitos. Além disso, duas skills de conduta não podem ser chamadas pelo usuário. O diagrama mostra os três caminhos de carga.
+
+```mermaid
+flowchart TD
+    task["Tarefa de um agente ou do usuário"] --> path{"Qual caminho carrega a skill?"}
+    path -->|"Pré-carga"| pre["Campo skills no frontmatter do agente"]
+    path -->|"Descrição"| desc["Campo description combina com a tarefa"]
+    path -->|"Comando"| cmd["Usuário digita /migrate"]
+```
+
+As quatro regras, com os caminhos citados dentro do toolkit:
 
 1. **Pré-carga pelo agente.** O campo `skills:` do frontmatter de cada arquivo em `agents/` lista as skills que o agente carrega antes de começar. Hoje: `migration-conduct` está nos sete agentes; `migration-patterns` está em `behavior-extractor`, `migration-planner` e `parity-reviewer`; `tdd` está em `task-decomposer` e `implementer`; `doc-writing` está em `doc-writer`.
-2. **Carga pela descrição.** Uma skill carrega sozinha quando o campo `description` do frontmatter combina com a tarefa. As nove skills de linguagem usam essa regra. `CLAUDE.md`, manda o agente carregar a skill da linguagem de origem ou a da linguagem de destino.
+2. **Carga pela descrição.** Uma skill carrega sozinha quando o campo `description` do frontmatter combina com a tarefa. As nove skills de linguagem usam essa regra. `CLAUDE.md` manda o agente carregar a skill da linguagem de origem ou a da linguagem de destino.
 3. **Só por comando.** `migrate` tem `disable-model-invocation: true`. Ele não é carregado pelo modelo, mesmo quando a descrição combina com a tarefa. Ele roda só quando o usuário digita `/migrate`.
-4. **Sem chamada pelo usuário nas skills de conduta.** `user-invocable: false` faz o usuário não chamar a skill pelo nome. `migration-conduct`, `migration-patterns`, `tdd` e `doc-writing` têm esse campo.
+4. **Sem chamada pelo usuário nas skills de conduta.** `user-invocable: false` impede que o usuário chame a skill pelo nome. `migration-conduct`, `migration-patterns`, `tdd` e `doc-writing` têm esse campo.
 
 ## Como verificar os fatos de uma skill de linguagem
 
-Uma skill de linguagem afirma fatos com fonte. As nove têm o mesmo bloco `metadata` (campo `metadata` de cada `SKILL.md`) e a mesma seção `## Sources`.
+Uma skill de linguagem afirma fatos com fonte. As nove têm o mesmo bloco `metadata` (campo `metadata` de cada `SKILL.md`) e a mesma seção `## Sources`. Use estas regras para confiar, ou desconfiar, de um fato:
 
 1. **Data e fontes no topo.** O parágrafo de abertura diz quando os fatos foram verificados e contra quais fontes (`skills/nodejs/SKILL.md`). Cada skill de linguagem tem uma seção `## Sources` com as fontes. Na `nodejs`, a seção `## Sources` lista URLs.
 2. **Fato com execução.** Um valor de runtime diz que foi executado, com a versão do runtime. Exemplo: `skills/typescript/SKILL.md`, cita a execução em Node v22.23.1.
 3. **Fato não verificado sai ou recebe marca.** Um fato que não pôde ser checado recebe a marca `verify before use` ou sai do texto. Exemplos: `skills/typescript/SKILL.md`, sobre a tag beta 7.1, que não é a baseline; e um trecho do mesmo arquivo, sobre o texto da ECMAScript, que não foi lido.
 4. **Gate não rodado é dito.** Quando um comando do gate não roda, a skill diz isso. Exemplo: `skills/flutter/SKILL.md`, diz que nenhum toolchain de Flutter ou Dart estava na máquina e que nenhum comando do gate foi rodado.
 5. **Baseline fixa.** Uma versão mais nova não muda a baseline sem nova verificação. Exemplo: `skills/golang/SKILL.md`, diz que a skill não move a baseline para go1.27.3.
-6. **Conferência manual.** `skills/migrate/scripts/check.sh` não tem subcomando para skills. Seus subcomandos são `status`, `pin`, `cites`, `ids`, `adr`, `hash` e `scope` (a estrutura `case` no fim de `check.sh`). Datas, versões e fontes das skills de linguagem não têm conferência automática.
+6. **Conferência manual.** `skills/migrate/scripts/check.sh` não tem subcomando para skills. Seus subcomandos são `status`, `pin`, `cites`, `ids`, `adr`, `hash` e `scope` (a estrutura `case` no fim de `check.sh`). Datas, versões e fontes das skills de linguagem não têm conferência automática. Confira esses itens à mão.

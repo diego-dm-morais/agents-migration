@@ -1,8 +1,36 @@
 # Toolkit de migração de código
 
+Esta seção explica o que é o toolkit e como ele funciona por dentro. Leia primeiro este arquivo. Ele aponta para os outros documentos.
+
 ## O que é
 
-O toolkit é um conjunto de agentes, skills e um script de verificação que ficam na pasta `.claude/` do projeto. Com ele, o Claude Code migra código de uma linguagem para outra, uma unidade por vez. Cada unidade passa por sete etapas, nesta ordem: extract, spec, plan, tasks, build, review e doc (documentação). Cada etapa tem um agente dono, que é o agente que a executa e grava o resultado: um artefato em `docs/migration/<unidade>/`, código no destino ou a documentação da unidade. O objetivo é o comportamento igual ao da origem, com as mesmas entradas aceitas e recusadas, as mesmas saídas e os mesmos erros. Uma decisão legada que contraria boa prática é preservada e registrada em um ADR (regra 10). O estado de cada etapa não fica em arquivo próprio: o script `check.sh` calcula o estado a partir dos artefatos. (`skills/migrate/SKILL.md`, `skills/migrate/references/stages.md`, `skills/migration-conduct/SKILL.md`, seção 1)
+O toolkit é um conjunto de **agentes** (assistentes de IA, cada um com uma tarefa fixa), **skills** (instruções reutilizáveis) e um script de verificação. Tudo fica na pasta `.claude/` do projeto. Com ele, o Claude Code migra código de uma linguagem para outra, uma **unidade** por vez.
+
+Uma unidade é a menor parte do sistema que funciona sozinha, como um endpoint da API. Cada unidade passa por sete etapas, nesta ordem:
+
+```mermaid
+flowchart LR
+    extract["extract"] --> spec["spec"]
+    spec --> plan["plan"]
+    plan --> tasks["tasks"]
+    tasks --> build["build"]
+    build --> review["review"]
+    review --> doc["doc (documentação)"]
+```
+
+Cada etapa tem um **agente dono**. É o agente que executa a etapa e grava o resultado. O resultado pode ser:
+
+- um artefato em `docs/migration/<unidade>/`;
+- o código no destino;
+- a documentação da unidade.
+
+O objetivo é o **comportamento igual ao da origem**. As mesmas entradas são aceitas e recusadas, e as saídas e os erros são os mesmos.
+
+Uma decisão do código legado (o sistema original) que contraria boa prática é preservada. Ela é registrada em um ADR (regra 10).
+
+O estado de cada etapa não fica em um arquivo próprio. O script `check.sh` calcula o estado a partir dos artefatos.
+
+(`skills/migrate/SKILL.md`, `skills/migrate/references/stages.md`, `skills/migration-conduct/SKILL.md`, seção 1)
 
 ## Para quem
 
@@ -12,16 +40,18 @@ O toolkit é um conjunto de agentes, skills e um script de verificação que fic
 
 ## Requisitos
 
-- Claude Code com suporte a subagentes e a skills. O `/migrate` despacha cada etapa para um agente com a ferramenta Agent (`skills/migrate/SKILL.md`).
-- Shell POSIX `sh`: Linux, macOS ou Git Bash no Windows. O `check.sh` é um script `sh` (`skills/migrate/scripts/check.sh`, cabeçalho).
-- Utilitários usados pelo `check.sh`: `awk`, `basename`, `cksum`, `cut`, `grep`, `head`, `sed`, `sort`, `tr`, `uniq` e `wc`.
-- `git`, para criar o snapshot da origem e ler o commit dele (`skills/migrate/references/intake.md`, seção `Create the snapshot`).
-- Acesso de leitura ao repositório de origem, pelo caminho local ou pela URL, na `source_ref` escolhida.
-- Permissão de escrita na pasta `.claude/` do projeto de destino. A memória do projeto, quando houver, fica em `.claude/memory/` (`CLAUDE.md`, seção Project memory).
+Antes de começar, confira o ambiente:
+
+- **Claude Code** com suporte a subagentes e a skills. O `/migrate` despacha cada etapa para um agente com a ferramenta Agent (`skills/migrate/SKILL.md`).
+- **Shell POSIX `sh`**: Linux, macOS ou Git Bash no Windows. Shell POSIX é o terminal padrão de sistemas Unix. Git Bash é esse terminal no Windows. O `check.sh` é um script `sh` (`skills/migrate/scripts/check.sh`, cabeçalho).
+- **Utilitários usados pelo `check.sh`:** `awk`, `basename`, `cksum`, `cut`, `grep`, `head`, `sed`, `sort`, `tr`, `uniq` e `wc`.
+- **`git`**, para criar o snapshot da origem e ler o commit dele (`skills/migrate/references/intake.md`, seção `Create the snapshot`).
+- **Acesso de leitura** ao repositório de origem, pelo caminho local ou pela URL, na `source_ref` escolhida.
+- **Permissão de escrita** na pasta `.claude/` do projeto de destino. A memória do projeto, quando houver, fica em `.claude/memory/` (`CLAUDE.md`, seção Project memory).
 
 ## Início rápido
 
-Comandos principais:
+Estes são os comandos principais:
 
 ```
 /migrate init
@@ -31,12 +61,18 @@ Comandos principais:
 /migrate ask [unidade]
 ```
 
-1. Copie a pasta `.claude/` para a raiz do projeto de destino.
-2. Rode `/migrate init`. O comando pergunta só o que falta em `docs/migration/MIGRATION.md`: origem, destino, tipo de unidade e idiomas. Depois cria o snapshot (cópia da origem no commit indicado, fora do projeto), confere o pin (o commit da origem fixado em `source_sha`, com a saída `pin OK`) e lista as unidades candidatas. Grava no backlog (a lista de unidades) só as que você confirmar (`skills/migrate/references/intake.md`).
-3. Rode `/migrate status`. O comando mostra o estado de cada etapa de cada unidade. Ele não altera arquivos (`skills/migrate/scripts/check.sh`, comando `status`).
-4. Rode `/migrate <unidade>`. As etapas rodam em ordem até a unidade ficar READY (extract, spec, plan e tasks em OK) ou até uma parada. O build só roda se você pedir. Para rodar uma etapa só, use `/migrate <unidade> <etapa>`; as etapas anteriores precisam estar OK (`skills/migrate/SKILL.md`).
-5. Quando o fluxo parar com uma pergunta, rode `/migrate ask`. Só as escolhas do usuário viram pergunta. Fatos, padrões de conduta e o que o código legado responde são resolvidos sem perguntar ao usuário (`skills/migrate/references/ask.md`, seção 2).
-6. Depois de `/clear`, rode `/migrate` de novo para retomar. O toolkit não guarda estado fora dos artefatos (`skills/migrate/SKILL.md`).
+1. **Copie** a pasta `.claude/` para a raiz do projeto de destino.
+2. **Rode `/migrate init`.** O comando pergunta só o que falta em `docs/migration/MIGRATION.md`: origem, destino, tipo de unidade e idiomas.
+   - Depois cria o **snapshot**, que é uma cópia da origem no commit indicado, fora do projeto.
+   - Confere o **pin**, que é o commit da origem fixado em `source_sha`, com a saída `pin OK`.
+   - Lista as unidades candidatas.
+   - Grava no **backlog** (a lista de unidades) só as que você confirmar (`skills/migrate/references/intake.md`).
+3. **Rode `/migrate status`.** O comando mostra o estado de cada etapa de cada unidade. Ele não altera arquivos (`skills/migrate/scripts/check.sh`, comando `status`).
+4. **Rode `/migrate <unidade>`.** As etapas rodam em ordem até a unidade ficar **READY** (extract, spec, plan e tasks em OK) ou até uma parada.
+   - O build só roda se você pedir.
+   - Para rodar uma etapa só, use `/migrate <unidade> <etapa>`. As etapas anteriores precisam estar OK (`skills/migrate/SKILL.md`).
+5. **Quando o fluxo parar com uma pergunta,** rode `/migrate ask`. Só as escolhas do usuário viram pergunta. Fatos, padrões de conduta e o que o código legado responde são resolvidos sem perguntar ao usuário (`skills/migrate/references/ask.md`, seção 2).
+6. **Depois de `/clear`,** rode `/migrate` de novo para retomar. O toolkit não guarda estado fora dos artefatos (`skills/migrate/SKILL.md`).
 
 ## Documentos
 
@@ -50,7 +86,7 @@ Esta pasta, `.claude/docs/`, guarda a documentação do toolkit. Ela tem sete ar
 - [convencoes.md](convencoes.md): nomes, frontmatter, estilo, idiomas, marcadores, ids, estados e onde cada regra mora.
 - [manutencao.md](manutencao.md): como adicionar, atualizar e aposentar agentes e skills, validar o toolkit e resolver problemas.
 
-Cada assunto tem sua regra completa no arquivo indicado na tabela abaixo:
+Cada assunto tem uma regra completa. Use a tabela abaixo para achar o arquivo certo:
 
 | Assunto | Onde ler |
 |---|---|
@@ -71,6 +107,8 @@ Cada assunto tem sua regra completa no arquivo indicado na tabela abaixo:
 - Nenhuma. Os sete documentos desta pasta existem, e nenhum arquivo do toolkit fora desta pasta cita os nomes deles.
 
 ## Glossário
+
+Estes são os termos que aparecem no toolkit. A coluna **Fonte** mostra onde a regra completa está.
 
 | Termo | Significado | Fonte |
 |---|---|---|

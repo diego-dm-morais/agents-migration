@@ -1,213 +1,244 @@
 # Toolkit de Migração de Código
 
-Toolkit reutilizável para o [Claude Code](https://claude.com/claude-code) que migra código de uma linguagem ou framework para outro, uma unidade por vez, preservando o comportamento do sistema original.
+Este toolkit ajuda você a migrar um sistema de uma linguagem ou framework para outro, sem perder o comportamento original. O trabalho é dividido em partes pequenas, chamadas **unidades** (por exemplo, um endpoint da API). Cada unidade passa por etapas, e um agente de IA cuida de cada etapa.
 
-Ele não é amarrado a nenhuma base de código. Copie a pasta `.claude/` para o projeto de destino, aponte para um repositório de origem e rode `/migrate`.
+Ele roda dentro do [Claude Code](https://claude.com/claude-code). Você copia a pasta `.claude/` para o seu projeto de destino, aponta para o repositório de origem e começa com `/migrate`.
 
 ## Sumário
 
-- [O que é](#o-que-é)
-- [Princípios](#princípios)
-- [Como funciona](#como-funciona)
-- [Requisitos](#requisitos)
-- [Início rápido](#início-rápido)
+- [Como funciona, em uma imagem](#como-funciona-em-uma-imagem)
+- [Antes de começar](#antes-de-começar)
+- [Passo a passo](#passo-a-passo)
+- [Exemplo de sessão](#exemplo-de-sessão)
 - [Comandos](#comandos)
-- [Agentes](#agentes)
-- [Skills de linguagem](#skills-de-linguagem)
-- [Estrutura do projeto](#estrutura-do-projeto)
-- [Artefatos gerados no projeto de destino](#artefatos-gerados-no-projeto-de-destino)
-- [Estados das etapas](#estados-das-etapas)
-- [Usando em qualquer migração](#usando-em-qualquer-migração)
-- [Desenvolvimento](#desenvolvimento)
-- [Documentação](#documentação)
-- [Convenções de idioma](#convenções-de-idioma)
+- [Quem faz o quê](#quem-faz-o-quê)
+- [Quando algo para](#quando-algo-para)
+- [As regras de ouro](#as-regras-de-ouro)
+- [Glossário rápido](#glossário-rápido)
+- [O que é gerado no projeto](#o-que-é-gerado-no-projeto)
+- [Estrutura do toolkit](#estrutura-do-toolkit)
+- [Usando em outra migração](#usando-em-outra-migração)
+- [Desenvolvimento do toolkit](#desenvolvimento-do-toolkit)
+- [Mais documentação](#mais-documentação)
+- [Idiomas](#idiomas)
 
-## O que é
+## Como funciona, em uma imagem
 
-Um conjunto de agentes, skills e um script de verificação que ficam em `.claude/`. O Claude Code lê esses arquivos e executa a migração como um pipeline em etapas:
-
-- a unidade de trabalho é a **unidade de migração**: a menor parte da origem que se comporta sozinha (um endpoint, um módulo, um serviço);
-- cada unidade passa por sete etapas, cada uma com um agente dono;
-- cada etapa grava um artefato, e um script shell (`check.sh`) calcula o estado de cada etapa a partir desses artefatos. Não há estado escondido: depois de um `/clear`, rodar `/migrate` de novo retoma de onde o trabalho parou.
-
-O objetivo é a paridade funcional: mesmas entradas aceitas e recusadas, mesmas saídas, mesmos erros.
-
-## Princípios
-
-O texto completo está em `.claude/skills/migration-conduct/SKILL.md` (seção 0).
-
-1. **Sem alucinação.** Toda afirmação sobre o comportamento da origem cita `path:line @sha7`, aberto na execução atual.
-2. **Sem regra de negócio inventada.** Uma regra é o que o código faz. Um `BR-` sem citação, ou um `FR-` sem `Source: BR-`, é rejeitado pelo `check.sh`.
-3. **Documentação fiel.** Bugs são documentados como `known-issue`, nunca corrigidos em silêncio.
-4. **O código implementado é a fonte da verdade.** Specs e docs antigos são só contexto.
-5. **Docs sempre em dia.** Os artefatos guardam o hash das suas fontes. Se o código ou um artefato anterior mudar, o artefato fica `STALE` e precisa ser gerado de novo.
-6. **Investigar antes de perguntar.** Primeiro o código, depois o código-fonte das dependências, depois a documentação oficial. Só se pergunta ao usuário o que muda o resultado e não se encontra em nenhuma dessas fontes.
-7. **Fidelidade ao legado.** Decisões legadas que contrariam boas práticas são preservadas e registradas em um ADR, com o motivo.
-
-## Como funciona
-
-```
-  /migrate init            intake: origem, tag/commit, destino, unidades -> snapshot + backlog
-        |
-        v
-  extract -> spec -> plan -> tasks -> build -> review -> doc
-  Eduardo    Sofia   Paula   Tiago    Isabela  Rafael   Daniela
+```mermaid
+flowchart LR
+    init["/migrate init"] --> extract["extract<br/>Eduardo"]
+    extract --> spec["spec<br/>Sofia"]
+    spec --> plan["plan<br/>Paula"]
+    plan --> tasks["tasks<br/>Tiago"]
+    tasks --> build["build<br/>Isabela"]
+    build --> review["review<br/>Rafael"]
+    review --> doc["doc<br/>Daniela"]
 ```
 
-- `/migrate <unidade>` roda `extract`, `spec`, `plan` e `tasks` até a unidade ficar **READY**, ou até uma parada. O `build` só roda quando você pedir.
-- Os agentes nunca perguntam direto ao usuário. Uma pergunta bloqueante encerra a etapa com `NEEDS: user: <pergunta>`, e o `/migrate ask` a apresenta.
-- A origem é lida de um **snapshot**: uma cópia do repositório de origem fixada em um commit exato (`source_sha`), guardada fora do projeto de destino e nunca alterada.
+Cada etapa faz uma coisa e grava o resultado em um arquivo:
 
-## Requisitos
+- **extract**: lê o código original e descreve o que ele faz, com citação de linha.
+- **spec**: escreve a especificação: o que a nova versão precisa fazer.
+- **plan**: decide como cada parte do original vira código na linguagem de destino.
+- **tasks**: quebra o plano em tarefas pequenas e ordenadas.
+- **build**: escreve o código novo e os testes, testes primeiro.
+- **review**: compara o código novo com o original e aponta divergências.
+- **doc**: documenta a unidade, em linguagem simples.
 
-- Claude Code com suporte a subagentes e skills.
-- Um `sh` POSIX: Linux, macOS ou Git Bash no Windows.
-- `git`, e acesso de leitura ao repositório de origem na tag, branch ou commit escolhido.
-- Utilitários comuns usados pelo `check.sh`: `awk`, `cksum`, `cut`, `grep`, `head`, `sed`, `sort`, `tr`, `uniq`, `wc`.
-- Python (só para rodar a suíte de testes do toolkit).
-- GitHub CLI (`gh`) autenticado, quando a origem é um repositório remoto. A skill `gh-check` confere isso.
+O objetivo é a **paridade**: a versão nova aceita as mesmas entradas, recusa as mesmas entradas, devolve as mesmas saídas e os mesmos erros.
 
-## Início rápido
+## Antes de começar
 
-1. Copie a pasta `.claude/` para a raiz do projeto de destino.
-2. Abra o projeto no Claude Code.
-3. Rode `/migrate init` e responda ao intake: repositório de origem, tag (ou branch/commit), endpoints ou unidades a migrar. Só se pergunta o que ainda não está em `docs/migration/MIGRATION.md`.
-4. Rode `/migrate status` para ver todas as unidades e etapas.
-5. Rode `/migrate <unidade>` para avançar uma unidade até READY.
-6. Quando uma etapa parar com uma pergunta, rode `/migrate ask`.
+Você precisa de:
+
+- **Claude Code** com suporte a agentes e skills.
+- Um shell `sh`. No Linux e no macOS ele já existe. No Windows, use o **Git Bash**.
+- **git**, e acesso de leitura ao repositório de origem (local ou remoto) na tag, branch ou commit que você vai migrar.
+- **GitHub CLI (`gh`)** autenticado, só se a origem for um repositório remoto. A skill `gh-check` confere isso para você.
+
+## Passo a passo
+
+1. **Copie** a pasta `.claude/` para a raiz do seu projeto de destino.
+2. **Abra** o projeto no Claude Code.
+3. **Rode `/migrate init`**. O comando pergunta só o que ainda falta:
+   - o repositório de origem (caminho local ou URL);
+   - a tag, branch ou commit a migrar;
+   - as unidades a migrar.
+   Ele cria uma cópia fixa da origem (o *snapshot*), confere o commit exato (o *pin*) e grava a lista de unidades (o *backlog*).
+4. **Rode `/migrate status`** para ver o estado de cada etapa de cada unidade. Esse comando só lê, não altera nada.
+5. **Rode `/migrate <unidade>`** para avançar a unidade até ela ficar **READY** (pronta para o build). Ele roda as etapas em ordem até terminar ou até parar com uma pergunta.
+6. **Quando parar com uma pergunta**, rode `/migrate ask`. Você responde, e o fluxo continua.
+
+### Como informar as unidades
+
+Você pode descrever as unidades de duas formas:
+
+- **Direto**, pelo método e caminho da operação. Exemplo: `POST /v1/users` vira a unidade `post-v1-users`. O agente acha a rota e o handler no código da origem.
+- **Por collection**, enviando um export do Postman, OpenAPI ou Apidog. A collection só serve para listar operações e nomes. Os exemplos dela nunca são usados como fonte de comportamento: a fonte é o código no commit fixado. Tokens e senhas viram `<redacted>`.
+
+O id da unidade precisa ter só letras minúsculas, números e hífens (`^[a-z0-9]+(-[a-z0-9]+)*$`).
+
+## Exemplo de sessão
+
+Exemplo ilustrativo, para mostrar a ordem dos comandos. Não é uma saída real.
+
+```
+/migrate init          # informa origem, tag e unidades
+/migrate status        # confere o que falta em cada unidade
+/migrate post-v1-users # roda extract, spec, plan e tasks
+/migrate ask           # responde a uma decisão que o código não resolve
+/migrate post-v1-users build   # só quando você decidir construir
+```
 
 ## Comandos
 
-| Comando | O que faz |
+| Comando | Quando usar |
 |---|---|
-| `/migrate init` | Intake: cria o snapshot, confere o pin, lista as unidades candidatas e grava no backlog as que você confirmar. |
-| `/migrate` ou `/migrate status` | Mostra o estado de cada etapa de cada unidade e o prazo. Só leitura. |
-| `/migrate <unidade>` | Roda as etapas em ordem até READY ou uma parada. |
-| `/migrate <unidade> <etapa>` | Roda uma única etapa. As etapas anteriores precisam estar `OK`. |
-| `/migrate ask [unidade]` | Responde às decisões pendentes que o código legado não resolve. |
-| `/migrate help` | Mostra a ajuda. |
+| `/migrate init` | No começo, para preparar o projeto. |
+| `/migrate` ou `/migrate status` | Para ver o andamento. Não altera arquivos. |
+| `/migrate <unidade>` | Para avançar uma unidade até READY. |
+| `/migrate <unidade> <etapa>` | Para rodar uma etapa só. As etapas anteriores precisam estar OK. |
+| `/migrate ask [unidade]` | Para responder às decisões pendentes. |
+| `/migrate help` | Para ver a ajuda do comando. |
 
-O id da unidade precisa casar com `^[a-z0-9]+(-[a-z0-9]+)*$`. Commit, push e PR ficam fora do `/migrate` e só acontecem se você pedir.
+O `build` só roda quando você pedir. Commit, push e PR também: nada disso sai sem o seu pedido.
 
-## Agentes
+## Quem faz o quê
 
-Despachados pelo `/migrate`. Chame um direto só quando precisar, pelo nome ou apelido.
+| Etapa | Agente (apelido) | O que entrega |
+|---|---|---|
+| extract | `behavior-extractor` (Eduardo) | Descrição do comportamento e das regras de negócio, com citação de linha. |
+| spec | `spec-writer` (Sofia) | Especificação: requisitos, o que fica de fora e as dúvidas em aberto. |
+| plan | `migration-planner` (Paula) | Mapa de cada parte da origem para a linguagem de destino. |
+| tasks | `task-decomposer` (Tiago) | Lista ordenada de tarefas pequenas. |
+| build | `implementer` (Isabela) | Código novo e testes. |
+| review | `parity-reviewer` (Rafael) | Lista de divergências em relação ao original, com rodadas de correção. |
+| doc | `doc-writer` (Daniela) | Documentação da unidade, em pt-BR e linguagem simples. |
 
-| Etapa | Agente | Apelido | Saída |
-|---|---|---|---|
-| extract | `behavior-extractor` | Eduardo | `extraction.md`: comportamentos e regras de negócio (`BR-`) com citações |
-| spec | `spec-writer` | Sofia | `spec.md`: requisitos funcionais (`FR-`), requisitos do destino (`TS-`), não objetivos, decisões pendentes |
-| plan | `migration-planner` | Paula | `plan.md`: mapeamento origem-destino, dependências fixadas, decisões |
-| tasks | `task-decomposer` | Tiago | `tasks.md`: tarefas ordenadas (capture, setup, test, impl, verify) |
-| build | `implementer` | Isabela | código do destino e testes, teste primeiro |
-| review | `parity-reviewer` | Rafael | `review.md`: achados (`RV-`) contra a origem |
-| doc | `doc-writer` | Daniela | documentação da unidade em linguagem simples |
+Você também pode chamar um agente direto, pelo nome ou apelido, mas o caminho normal é sempre `/migrate`.
 
-## Skills de linguagem
+## Quando algo para
 
-Carregadas para a linguagem de origem e para a de destino:
+Cada etapa recebe um dos estados abaixo. O `/migrate status` mostra qual é o de cada uma.
 
-`golang`, `java`, `python`, `nodejs`, `typescript`, `javascript`, `dotnet`, `rust`, `flutter`.
+| Estado | O que significa | O que fazer |
+|---|---|---|
+| `MISSING` | O arquivo da etapa ainda não existe. | Rode `/migrate <unidade>`. |
+| `DRAFT` | Foi escrito, mas não terminou. | Rode a etapa de novo ou responda às pendências. |
+| `BLOCKED` | Falta uma decisão bloqueante. | Rode `/migrate ask`. |
+| `INVALID` | Não passou numa verificação de formato ou de citação. | Rode a etapa de novo. |
+| `STALE` | O código ou uma etapa anterior mudou depois. | Rode a etapa de novo. |
+| `OK` | Válido e atualizado. | Nada. |
 
-Cada uma tem um `as-source.md` (o que observar ao ler essa linguagem) e um `as-target.md` (como escrevê-la de forma idiomática sem mudar o comportamento). Skills de apoio: `migration-conduct`, `migration-patterns`, `tdd`, `doc-writing`, `gh-check`.
+Uma unidade fica **READY** quando extract, spec, plan e tasks estão OK.
 
-## Estrutura do projeto
+Quando um agente não consegue decidir sozinho, ele não chuta. Ele para e escreve uma pergunta, que aparece em `/migrate ask`. Antes de perguntar, ele investiga o código original e as bibliotecas. Só pergunta o que o código não responde.
+
+**Depois de um `/clear`**, rode `/migrate` de novo. O progresso fica nos arquivos, não na memória da conversa.
+
+## As regras de ouro
+
+1. **Sem chute.** Toda afirmação sobre o original vem com a linha de código que a comprova.
+2. **Sem regra inventada.** A regra de negócio é o que o código faz de verdade.
+3. **Bug vira bug documentado.** Um erro do original é mantido e marcado como `known-issue`. Não é corrigido em silêncio.
+4. **O código é a fonte da verdade.** Specs e docs antigos servem só de contexto.
+5. **Docs em dia.** Se o código mudar, o documento antigo vira `STALE` e é gerado de novo.
+6. **Investigar antes de perguntar.** Primeiro o código, depois as dependências, depois a documentação oficial.
+7. **Preservar decisões legadas.** Se o original faz algo que contraria a boa prática, isso fica mantido e registrado em um ADR (um registro curto, com o motivo).
+
+As regras completas estão em `.claude/skills/migration-conduct/SKILL.md`.
+
+## Glossário rápido
+
+| Termo | Significado |
+|---|---|
+| **Unidade** | Menor parte do código que funciona sozinha. Ex.: um endpoint. |
+| **Snapshot** | Cópia fixa da origem, feita fora do projeto de destino. Nunca é alterada. |
+| **Pin** | O commit exato da origem usado como referência (`source_sha`). |
+| **Artefato** | Arquivo que uma etapa grava, em `docs/migration/<unidade>/`. |
+| **Backlog** | A lista de unidades a migrar, em `docs/migration/MIGRATION.md`. |
+| **ADR** | Registro de uma decisão legada mantida de propósito, com o motivo. |
+| **`known-issue`** | Marcador de um bug do original que o destino mantém de propósito. |
+
+Glossário completo em [.claude/docs/README.md](.claude/docs/README.md).
+
+## O que é gerado no projeto
+
+```
+docs/migration/
+├── MIGRATION.md        # origem, commit fixado, destino, idiomas, limites e backlog
+├── adr/
+│   └── ADR-NNN-<slug>.md
+└── <unidade>/
+    ├── extraction.md   # extract
+    ├── spec.md         # spec
+    ├── plan.md         # plan
+    ├── tasks.md        # tasks
+    └── review.md       # review
+```
+
+Todo arquivo começa com `status: draft`. Os formatos estão em `.claude/skills/migrate/references/templates.md`.
+
+## Estrutura do toolkit
 
 ```
 .
 ├── .claude/
-│   ├── CLAUDE.md                  # instruções do toolkit, valem mais que as globais
-│   ├── settings.local.json        # hook SessionStart que imprime `check.sh status`
-│   ├── agents/                    # os sete agentes de etapa
-│   ├── skills/
-│   │   ├── migrate/               # orquestrador: SKILL.md, references/, scripts/check.sh
-│   │   ├── migration-conduct/     # as regras obrigatórias
-│   │   ├── migration-patterns/    # mapa de idiomas entre linguagens
-│   │   ├── tdd/  doc-writing/  gh-check/
-│   │   └── <linguagem>/           # golang, java, python, nodejs, ...
-│   ├── docs/                      # documentação humana (pt-BR)
-│   ├── tests/                     # suíte de testes do toolkit
-│   └── memory/                    # memória local do Claude (fora do git)
+│   ├── CLAUDE.md           # instruções do toolkit (têm prioridade)
+│   ├── settings.local.json # mostra o status ao abrir a sessão
+│   ├── agents/             # os sete agentes, um por etapa
+│   ├── skills/             # o orquestrador (migrate), as regras e as linguagens
+│   ├── docs/               # documentação humana, em pt-BR
+│   ├── tests/              # testes do toolkit
+│   └── memory/             # memória local do Claude (fora do git)
 └── README.md
 ```
 
-## Artefatos gerados no projeto de destino
+## Usando em outra migração
 
-```
-docs/migration/
-├── MIGRATION.md        # origem, pin (source_sha), destino, idiomas, limites, prazo, backlog
-├── adr/
-│   └── ADR-NNN-<slug>.md
-└── <unidade>/
-    ├── extraction.md
-    ├── spec.md
-    ├── plan.md
-    ├── tasks.md
-    └── review.md
-```
-
-Todo artefato começa com `status: draft`. Os formatos e os ids (`BR`, `FR`, `TS`, `NG`, `AG`, `PEND`, `ID`, `T`, `RV`, `DEC`, `ADR`) estão em `.claude/skills/migrate/references/templates.md`.
-
-## Estados das etapas
-
-O `check.sh` calcula um destes estados para cada etapa:
-
-| Estado | Significado |
-|---|---|
-| `MISSING` | O artefato não existe. |
-| `DRAFT` | Escrito, mas não finalizado. |
-| `BLOCKED` | Aguardando uma decisão bloqueante. |
-| `INVALID` | Reprovado em uma verificação de formato ou de citação. |
-| `STALE` | Um artefato anterior ou o código mudou depois. Gere de novo. |
-| `OK` | Válido e atual. |
-
-Uma unidade fica **READY** quando extract, spec, plan e tasks estão `OK`.
-
-## Usando em qualquer migração
-
-Nada no toolkit é específico de um projeto. Para reutilizá-lo:
+O toolkit não é preso a um projeto. Para reutilizá-lo:
 
 1. Copie `.claude/` para o novo projeto de destino.
 2. Rode `/migrate init` com a nova origem e o novo destino.
-3. Se o seu par de linguagens não estiver coberto, crie uma skill em `.claude/skills/<linguagem>/` seguindo uma existente (veja `.claude/docs/manutencao.md`).
+3. Se o seu par de linguagens não existir, crie uma skill em `.claude/skills/<linguagem>/`, seguindo uma já existente. O guia está em `.claude/docs/manutencao.md`.
 
-Os únicos arquivos específicos do projeto são gerados na execução: `docs/migration/` e o snapshot da origem.
+Só `docs/migration/` e o snapshot são específicos de cada projeto, e são gerados na execução.
 
-## Desenvolvimento
+## Desenvolvimento do toolkit
 
-Rode a suíte completa de testes do toolkit a partir da raiz do repositório:
+Para testar o toolkit, rode a suíte completa a partir da raiz do repositório:
 
 ```sh
 sh .claude/tests/run-tests.sh
 ```
 
-Ela roda o gate de formato, o linter de vocabulário, as verificações de consistência e de regras e os cenários do `check.sh`. A última linha imprime `run-tests exit=<código>`.
+A última linha mostra `run-tests exit=<código>`. Código `0` quer dizer que tudo passou. Python é necessário só para essa suíte.
 
-Comandos úteis ao trabalhar no toolkit:
+Comandos úteis:
 
 ```sh
 sh .claude/skills/migrate/scripts/check.sh status        # estado de cada unidade
-sh .claude/skills/migrate/scripts/check.sh pin           # o HEAD do snapshot é o source_sha
-sh .claude/skills/migrate/scripts/check.sh cites <file>  # as citações resolvem no snapshot
-sh .claude/skills/migrate/scripts/check.sh ids [unit]    # ids duplicados e cobertura
+sh .claude/skills/migrate/scripts/check.sh pin           # confere o commit do snapshot
+sh .claude/skills/migrate/scripts/check.sh cites <file>  # confere as citações
+sh .claude/skills/migrate/scripts/check.sh ids [unit]    # procura ids duplicados
 ```
 
-Ao mudar um agente, uma skill ou o `check.sh`, atualize o arquivo correspondente em `.claude/docs/` e rode a suíte de novo. Como adicionar, atualizar e aposentar agentes e skills está em `.claude/docs/manutencao.md`.
+Ao mudar um agente, uma skill ou o `check.sh`, atualize o doc correspondente em `.claude/docs/` e rode a suíte de novo.
 
-## Documentação
+## Mais documentação
 
-A documentação humana (pt-BR) está em `.claude/docs/`:
+A documentação humana, em pt-BR, está em `.claude/docs/`:
 
 - [README.md](.claude/docs/README.md): visão geral, início rápido e glossário.
 - [arquitetura.md](.claude/docs/arquitetura.md): como agentes e skills se encaixam.
-- [agentes.md](.claude/docs/agentes.md): os sete agentes.
+- [agentes.md](.claude/docs/agentes.md): os sete agentes em detalhe.
 - [skills.md](.claude/docs/skills.md): skills de fluxo, de conduta e de linguagem.
-- [fluxo.md](.claude/docs/fluxo.md): etapas, artefatos, estados, limites e receitas.
-- [convencoes.md](.claude/docs/convencoes.md): nomes, frontmatter, marcadores e ids.
-- [manutencao.md](.claude/docs/manutencao.md): manutenção do toolkit.
+- [fluxo.md](.claude/docs/fluxo.md): etapas, artefatos, estados e receitas.
+- [convencoes.md](.claude/docs/convencoes.md): nomes, marcadores e ids.
+- [manutencao.md](.claude/docs/manutencao.md): como manter o toolkit.
 
-## Convenções de idioma
+## Idiomas
 
-- Respostas ao usuário e docs de migração gerados: pt-BR.
-- Código, comentários, mensagens de commit e prompts de agentes e skills: inglês.
-- Identificadores, literais, caminhos, SQL e mensagens de erro nunca são traduzidos.
+- Respostas ao usuário e docs gerados da migração: pt-BR.
+- Código, comentários, mensagens de commit e prompts de agentes: inglês.
+- Identificadores, caminhos, comandos, SQL e mensagens de erro nunca são traduzidos.
