@@ -6,7 +6,8 @@ skills:
   - migration-conduct
   - doc-writing
 color: orange
-effort: xhigh
+model: claude-haiku-5-5
+effort: high
 ---
 
 # doc-writer

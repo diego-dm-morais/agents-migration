@@ -6,7 +6,8 @@ skills:
   - migration-conduct
   - tdd
 color: green
-effort: xhigh
+model: claude-haiku-5-5
+effort: high
 ---
 
 # implementer

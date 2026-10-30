@@ -6,7 +6,8 @@ skills:
   - migration-conduct
   - tdd
 color: yellow
-effort: xhigh
+model: claude-haiku-5-5
+effort: high
 ---
 
 # task-decomposer

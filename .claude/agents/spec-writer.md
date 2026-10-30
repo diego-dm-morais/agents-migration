@@ -5,7 +5,8 @@ tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 skills:
   - migration-conduct
 color: purple
-effort: xhigh
+model: claude-haiku-5-5
+effort: high
 ---
 
 # spec-writer
