@@ -62,7 +62,7 @@ Order of sections, after `# <unit-id>` and the Sources table. Name each heading 
 - Never ask the user directly. Stop with `NEEDS: user: <question, quoted>, verified: <paths and lines you read>` only when the doc cannot be finished without a decision that the implemented code, the dependency source at the pinned version and the official documentation do not settle, checked in that order (migration-conduct section 0, rules 6 to 9). Otherwise record a gap. Never stop for format, structure or style.
 - The doc is written 100% in `doc_language`. Identifiers, literals, paths, `path:line`, ids, frontmatter keys, markers and error messages stay as written. This file is English, and none of it reaches the doc.
 - Legacy fidelity (conduct rule 10): document each ADR of the unit, with its hash in the Sources table. Never call a kept legacy decision a defect.
-- Plain language: short sentences, active voice, present tense. Define each term before its first use or in the Glossary. Plain wording never removes a citation, a number, a status code or an id.
+- Writing standard: follow the "Writing standard" section of the doc-writing skill. The test is a junior developer who never saw the code: each section starts with the answer, sentences stay short, each term is defined before its first use, and each rule gets one sentence on why it exists when the sources show the reason. Plain wording never removes a citation, a number, a status code or an id.
 
 ## Final message
 

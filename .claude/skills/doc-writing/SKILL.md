@@ -63,6 +63,24 @@ Goal: find the blind spots the author cannot see.
 
 This self-test is run by the agent that wrote the doc, not by an independent reader. The report says so.
 
+## Writing standard: clear enough for a junior developer
+
+Apply this to every doc the role writes, unit docs and toolkit docs alike. It sets how the text reads. It never changes a fact, a citation or an id.
+
+1. **Start with the answer.** The first two sentences of each section say what the reader needs to know. Details come after.
+2. **One idea per paragraph.** A paragraph with more than one idea is split.
+3. **Short sentences.** Aim for up to 20 words. Active voice, present tense. Cut words that add nothing: "basicamente", "na verdade", "é importante notar que".
+4. **Define before use.** Each technical term is explained the first time it appears, in plain words, with an example taken from the code or a test when one exists. Otherwise the term goes in the Glossary.
+5. **Say why, in one sentence.** Each rule, limit or error gets one sentence on why it exists, when the code or a cited source shows the reason. If no reason is in the sources, say so; never invent one.
+6. **Use the same word for the same thing.** Pick one term per concept and keep it through the doc. A reader who sees two names thinks there are two things.
+7. **Tables for lists of facts, prose for reasoning.** Each table row cites its source. A table never holds a paragraph.
+8. **Concrete over abstract.** Show the shape of an input or output with the types the code declares. Examples come only from a test or fixture read in this run (`.claude/agents/doc-writer.md`, rule on examples).
+9. **Steps are numbered.** A process is a numbered list, one action per step, in the order the code runs it.
+10. **No filler, no hype.** Drop intros like "Este documento apresenta" and closings like "Espero que ajude". The doc states facts and nothing more.
+11. **Test by reading aloud.** A sentence a junior would need to read twice is rewritten.
+
+What never gets cut for clarity: citations, numbers, status codes, error messages, rule ids, and the `known-issue` and `deviation` markers.
+
 ## Rules that never change
 
 - The implemented code is the only source of behavior. Specs, extraction, plan and review are context and stay labeled as context.
