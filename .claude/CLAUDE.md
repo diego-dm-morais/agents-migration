@@ -11,7 +11,7 @@ At the first reply of each session in this project, before any other work:
 3. Otherwise (`project MISSING`, `units NONE`, or every unit's `doc` is `OK`), this is a first session with no migration in progress. Run the `gh-check` skill first; if `gh` is missing or not authenticated, alert the user in pt-BR with the fix it gives. Then read `.claude/skills/migrate/references/help.md` and show its content verbatim first (same output as `/migrate help`; the skill is user-invoked only, so print the file yourself instead of invoking it). Then ask the user in one message for:
    - the source repository (local path or URL);
    - the tag to migrate (or branch or commit);
-   - the unit(s) to migrate.
+   - the unit(s) to migrate, in either form: directly, as an HTTP operation (method + path, for example `POST /v1/users`, which becomes the unit id `post-v1-users`); or through a collection (Postman, OpenAPI or Apidog export), which is used only to list operations and names, with secrets redacted.
    Ask only for what `docs/migration/MIGRATION.md` does not already give.
 4. Do not run the intake yourself. Tell the user the answers and ask them to type `/migrate init` with them: the skill is user-invoked only, and its `allowed-tools` and rules apply only when it runs. The intake then asks for whatever is still missing.
 

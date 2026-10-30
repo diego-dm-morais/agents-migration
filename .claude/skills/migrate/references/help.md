@@ -31,6 +31,11 @@ Texto exibido por `/migrate help` e na primeira resposta de uma sessão sem migr
 - Para uma execução sem segundo plano, use `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`.
 - Commit, push e PR ficam fora do `/migrate`. Só saem se você pedir.
 
+## Como informar as unidades
+
+- Direto: método e caminho da operação, por exemplo `POST /v1/users`. O id da unidade vira `post-v1-users`. O Eduardo acha a rota e o handler no código da origem.
+- Por collection: export do Postman, OpenAPI ou Apidog. A collection só lista as operações e os nomes. Os exemplos dela nunca são fonte de comportamento (o código no pin é). Tokens e credenciais viram `<redacted>`.
+
 ## Estados de cada etapa
 
 MISSING, DRAFT, BLOCKED, INVALID, STALE e OK.
