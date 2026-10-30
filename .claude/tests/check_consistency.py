@@ -107,7 +107,7 @@ mandatory = claude_md.split("## Mandatory rules", 1)[-1].split("## Project memor
 section0 = conduct.split("## 0. Mandatory rules", 1)[-1].split("## 1. Goal", 1)[0]
 claude_rules, conduct_rules = rule_titles(mandatory), rule_titles(section0)
 check("mandatory rules: CLAUDE.md and conduct section 0 agree on numbers and titles",
-      sorted(claude_rules) == list(range(1, 13)) and claude_rules == conduct_rules,
+      sorted(claude_rules) == list(range(1, 14)) and claude_rules == conduct_rules,
       f"CLAUDE.md {claude_rules} / conduct {conduct_rules}")
 
 print("consistency:", "PASS" if not fails else f"FAIL ({len(fails)})")

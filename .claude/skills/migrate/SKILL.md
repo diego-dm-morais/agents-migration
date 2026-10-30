@@ -58,6 +58,7 @@ Run it before every decision and after every worker returns. Its output is the o
 
 ## Review loop (`<unit> review`, or the review step of READY)
 
+- Start a review only when the build is at 100% (migration-conduct rule 13). A partial build stays in build and is not sent to review.
 - The parity-reviewer writes `review.md` with a `round` number. Its `NEEDS` line is `none` when the review is OK, or `implementer: <open RV ids>` when fixes are needed.
 - On `implementer`, dispatch implementer in fix mode with the review path and the open RV ids. Then run `status`: the review is STALE, because the code changed.
 - Dispatch parity-reviewer again for a new round. Stop after `limit_review_rounds` rounds, or after `limit_fix_rounds` fix dispatches, and report the open RV ids.

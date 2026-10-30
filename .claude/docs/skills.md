@@ -37,7 +37,7 @@ Estas formas estão definidas em `skills/migrate/SKILL.md`:
 
 Os agentes são despachados pelo `/migrate`. Chame um agente direto só quando o usuário pedir pelo nome ou pelo apelido (`CLAUDE.md`).
 
-### As doze regras obrigatórias
+### As treze regras obrigatórias
 
 As regras estão em `skills/migration-conduct/SKILL.md`, seção 0. Elas são o coração do toolkit. Este é o resumo, com os mesmos números:
 
@@ -53,6 +53,7 @@ As regras estão em `skills/migration-conduct/SKILL.md`, seção 0. Elas são o 
 10. **Fidelidade ao legado (prioridade absoluta).** A equivalência funcional vem antes de boa prática, estilo ou velocidade. O código legado responde antes de qualquer pergunta e é a fonte da verdade: seu comportamento, suas regras, validações e decisões são preservados, mesmo quando contrariam boa prática. Cada decisão legada que contraria boa prática e deve ser mantida vira um ADR (seção 13).
 11. **Sem criatividade no alvo.** Os agentes não inventam comportamento, regra, campo, estado, rota, evento, texto ou layout que o legado não implementa. Uma lacuna vira `Gaps` ou PEND com `blocking: yes`, nunca suposição.
 12. **Produtividade dentro do prazo.** Cada decisão e entrega é conferida contra as fontes antes de sair. Não se repete análise, não se fazem perguntas desnecessárias e não se constrói o que nenhum requisito pede. A ordem segue o caminho crítico do `deadline`. Prazo e velocidade nunca reduzem fidelidade funcional nem qualidade técnica.
+13. **Construir até 100%, depois revisar.** Construa o código-alvo e os testes unitários até 100% antes da revisão: cada tarefa `done` com evidência; cada `FR-` e cada `BR-` de núcleo coberto por teste unitário que passa e reproduz o comportamento legado citado; cada `deferred-capture` executado, ou registrado como `NOT RUN` com o motivo. Um item `blocked` deixa a unidade abaixo de 100%: é reportado com o motivo, e código parcial nunca vai para a revisão. Com 100% de convergência com o código legado no pin, a unidade vai para a etapa `review` (parity-reviewer); depois o fluxo atual segue: rodadas de revisão e, então, `doc`.
 
 A seção 13 da conduta define as decisões legadas: `DEC-NNN` na extração e `ADR-NNN` em `docs/migration/adr/`. A seção 12 define o contrato da mensagem final.
 

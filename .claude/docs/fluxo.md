@@ -232,6 +232,7 @@ Fonte: `skills/migration-conduct/SKILL.md`, seção 0. Os números são os da co
 10. **Fidelidade ao legado (prioridade absoluta).** A equivalência funcional vem antes de boa prática, estilo ou velocidade. O código legado responde antes de qualquer pergunta e é a fonte da verdade: seu comportamento, suas regras, validações e decisões são preservados, mesmo quando contrariam boa prática ou padrões recomendados do alvo. Não se muda o legado para seguir boa prática por iniciativa própria. Cada decisão legada que contraria boa prática e precisa ser mantida vira um ADR, com a razão de manter o comportamento (seção 13).
 11. **Sem criatividade no alvo.** Os agentes não inventam comportamento, regra, campo, estado, rota, evento, texto ou layout que o legado não implementa. Lacuna vira entrada em `Gaps` ou PEND com `blocking: yes`, nunca suposição.
 12. **Produtividade dentro do prazo.** Cada decisão e entrega é conferida contra as fontes antes de sair. Não se repete análise, não se fazem perguntas desnecessárias e não se constrói o que nenhum requisito pede. A ordem segue o caminho crítico do `deadline`. Prazo e velocidade nunca reduzem fidelidade funcional nem qualidade técnica.
+13. **Construir até 100%, depois revisar.** Construa o código-alvo e os testes unitários até 100% antes da revisão: cada tarefa `done` com evidência; cada `FR-` e cada `BR-` de núcleo coberto por teste unitário que passa e reproduz o comportamento legado citado; cada `deferred-capture` executado, ou registrado como `NOT RUN` com o motivo. Um item `blocked` deixa a unidade abaixo de 100%: é reportado com o motivo, e código parcial nunca vai para a revisão. Com 100% de convergência com o código legado no pin, a unidade vai para a etapa `review` (parity-reviewer); depois o fluxo atual segue: rodadas de revisão e, então, `doc`.
 
 ## Escada de evidência de paridade
 
@@ -274,7 +275,7 @@ Receita é um passo a passo para uma situação comum.
    - monta o backlog com behavior-extractor em modo `survey` e grava as unidades confirmadas em `## Backlog`.
 3. `/migrate <unidade>` roda `extract`, `spec`, `plan` e `tasks`, nessa ordem. Em cada etapa: roda `status`, despacha o dono, espera, roda `status` e lê a linha `NEEDS` (`skills/migrate/SKILL.md`, seção `Stage loop`).
 4. Se a etapa para em `NEEDS: user` ou spec BLOCKED, rode `/migrate ask <unidade>`. O fluxo junta os `PEND` sem `resolution` em `spec.md` e os `ID` com `status: proposed` em `plan.md` (`ask.md`, seção 1). Depois rode `/migrate <unidade>` de novo (`ask.md`, seção 6).
-5. Com READY, rode `/migrate <unidade> build` só se o usuário pediu. Depois, rode `/migrate <unidade> review`: o parity-reviewer escreve a rodada.
+5. Com READY, rode `/migrate <unidade> build` só se o usuário pediu. Depois, rode `/migrate <unidade> review` (só com o build a 100%, regra 13): o parity-reviewer escreve a rodada.
    - Se a linha for `NEEDS: implementer: <RV abertos>`, o implementer corrige, o `review` vira STALE e começa nova rodada.
    - `/migrate <unidade> doc` só roda com review OK.
 6. Reporte a unidade, as etapas rodadas, os estados finais, os itens abertos e cada linha `NEEDS` (`skills/migrate/SKILL.md`, seção `Rules`). Não diga que a unidade está pronta enquanto o doc estiver STALE.
