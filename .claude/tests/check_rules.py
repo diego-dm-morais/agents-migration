@@ -63,11 +63,16 @@ for s in LANG:
     text = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
     if "## Library registry" not in text or not any(r in text for r in REGISTRY):
         gaps.append(f"library research skill {s}: needs '## Library registry' with its registry URL")
-for a in ["migration-planner", "implementer"]:
+for a in ["migration-planner"]:
     path = os.path.join(root, "agents", a + ".md")
     text = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
     if "library-research" not in text:
         gaps.append(f"library research agent {a}: must point to references/library-research.md")
+# The implementer gets the rule from migration-conduct, which it preloads (section 10).
+conduct = os.path.join(root, "skills", "migration-conduct", "SKILL.md")
+text = open(conduct, encoding="utf-8").read() if os.path.exists(conduct) else ""
+if "library-research" not in text:
+    gaps.append("library research: migration-conduct section 10 must point to references/library-research.md")
 
 for g in gaps:
     print("GAP", g)
